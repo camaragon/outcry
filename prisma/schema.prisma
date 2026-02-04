@@ -1,0 +1,198 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+model Workspace {
+  id                     String   @id @default(uuid())
+  name                   String
+  slug                   String   @unique
+  logo                   String?
+  accentColor            String?
+  plan                   Plan     @default(FREE)
+  stripeCustomerId       String?  @unique
+  stripeSubscriptionId   String?  @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+
+  boards     Board[]
+  users      User[]
+  categories Category[]
+  changelogs Changelog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+model User {
+  id        String  @id @default(uuid())
+  clerkId   String  @unique
+  email     String
+  name      String?
+  avatarUrl String?
+  role      Role    @default(USER)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  posts    Post[]
+  votes    Vote[]
+  comments Comment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@index([clerkId])
+}
+
+enum Role {
+  USER
+  ADMIN
+  OWNER
+}
+
+model Board {
+  id       String  @id @default(uuid())
+  name     String
+  slug     String
+  isPublic Boolean @default(true)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  posts Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+}
+
+model Post {
+  id        String     @id @default(uuid())
+  title     String
+  body      String     @db.Text
+  status    PostStatus @default(OPEN)
+  voteCount Int        @default(0)
+
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  votes    Vote[]
+  comments Comment[]
+
+  mergedInto       String?
+  changelogEntries ChangelogPost[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([boardId])
+  @@index([authorId])
+  @@index([status])
+}
+
+enum PostStatus {
+  OPEN
+  UNDER_REVIEW
+  PLANNED
+  IN_PROGRESS
+  COMPLETE
+  CLOSED
+}
+
+model Vote {
+  id String @id @default(uuid())
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model Comment {
+  id      String  @id @default(uuid())
+  body    String  @db.Text
+  isAdmin Boolean @default(false)
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+}
+
+model Category {
+  id    String @id @default(uuid())
+  name  String
+  color String
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  posts Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+}
+
+model Changelog {
+  id          String    @id @default(uuid())
+  title       String
+  body        String    @db.Text
+  publishedAt DateTime?
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  posts ChangelogPost[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+}
+
+model ChangelogPost {
+  id String @id @default(uuid())
+
+  changelogId String
+  changelog   Changelog @relation(fields: [changelogId], references: [id], onDelete: Cascade)
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([changelogId, postId])
+}
