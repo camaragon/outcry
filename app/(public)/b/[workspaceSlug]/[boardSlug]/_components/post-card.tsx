@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +18,16 @@ interface PostCardProps {
   };
   hasVoted: boolean;
   isSignedIn: boolean;
+  workspaceSlug: string;
+  boardSlug: string;
 }
 
 export function PostCard({
   post,
   hasVoted,
   isSignedIn,
+  workspaceSlug,
+  boardSlug,
 }: PostCardProps) {
   const statusInfo = STATUS_LABELS[post.status] ?? STATUS_LABELS.OPEN;
 
@@ -34,7 +39,10 @@ export function PostCard({
         hasVoted={hasVoted}
         isSignedIn={isSignedIn}
       />
-      <div className="flex-1 min-w-0">
+      <Link
+        href={`/b/${workspaceSlug}/${boardSlug}/${post.id}`}
+        className="flex-1 min-w-0"
+      >
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="font-medium text-foreground">{post.title}</h3>
           <Badge variant={statusInfo.variant} className="text-xs">
@@ -67,7 +75,7 @@ export function PostCard({
             })}
           </span>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }
