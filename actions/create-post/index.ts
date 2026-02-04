@@ -3,6 +3,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { findOrCreateUser } from "@/lib/find-or-create-user";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { CreatePost } from "./schema";
 import { InputType, ReturnType } from "./types";
@@ -23,34 +24,11 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "You must be signed in to create a post." };
   }
 
-  const email = user.emailAddresses[0]?.emailAddress;
-  if (!email) {
-    return { error: "No email address found on your account." };
-  }
-
   if (!board) {
     return { error: "Board not found." };
   }
 
-  // Find or create the user record for this workspace
-  let dbUser = await db.user.findFirst({
-    where: { clerkId: user.id, workspaceId: board.workspaceId },
-    select: { id: true },
-  });
-
-  if (!dbUser) {
-    dbUser = await db.user.create({
-      data: {
-        clerkId: user.id,
-        email,
-        name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || null,
-        avatarUrl: user.imageUrl,
-        role: "USER",
-        workspaceId: board.workspaceId,
-      },
-      select: { id: true },
-    });
-  }
+  const dbUser = await findOrCreateUser(user, board.workspaceId);
 
   let post;
 

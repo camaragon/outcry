@@ -66,9 +66,7 @@ export async function AdminPostList({ boardId }: AdminPostListProps) {
               )}
             </div>
             <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-              {post.body.length > 200
-                ? post.body.slice(0, 200) + "…"
-                : post.body}
+              {post.body}
             </p>
             <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
               <span>by {post.author.name ?? post.author.email}</span>

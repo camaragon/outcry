@@ -3,6 +3,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { findOrCreateUser } from "@/lib/find-or-create-user";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { ToggleVote } from "./schema";
 import { InputType, ReturnType } from "./types";
@@ -33,72 +34,48 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "You must be signed in to vote." };
   }
 
-  const email = user.emailAddresses[0]?.emailAddress;
-  if (!email) {
-    return { error: "No email address found on your account." };
-  }
-
   if (!post) {
     return { error: "Post not found." };
   }
 
-  // Find or create the user record for this workspace
-  let dbUser = await db.user.findFirst({
-    where: { clerkId: user.id, workspaceId: post.board.workspaceId },
-    select: { id: true },
-  });
-
-  if (!dbUser) {
-    dbUser = await db.user.create({
-      data: {
-        clerkId: user.id,
-        email,
-        name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || null,
-        avatarUrl: user.imageUrl,
-        role: "USER",
-        workspaceId: post.board.workspaceId,
-      },
-      select: { id: true },
-    });
-  }
-
-  // Check for existing vote
-  const existingVote = await db.vote.findUnique({
-    where: {
-      postId_userId: {
-        postId,
-        userId: dbUser.id,
-      },
-    },
-  });
+  const dbUser = await findOrCreateUser(user, post.board.workspaceId);
 
   let updatedPost;
 
   try {
-    if (existingVote) {
-      // Remove vote
-      await db.vote.delete({
-        where: { id: existingVote.id },
-      });
-
-      updatedPost = await db.post.update({
-        where: { id: postId },
-        data: { voteCount: { decrement: 1 } },
-      });
-    } else {
-      // Add vote
-      await db.vote.create({
-        data: {
-          postId,
-          userId: dbUser.id,
+    updatedPost = await db.$transaction(async (tx) => {
+      const existingVote = await tx.vote.findUnique({
+        where: {
+          postId_userId: {
+            postId,
+            userId: dbUser.id,
+          },
         },
       });
 
-      updatedPost = await db.post.update({
-        where: { id: postId },
-        data: { voteCount: { increment: 1 } },
-      });
-    }
+      if (existingVote) {
+        await tx.vote.delete({
+          where: { id: existingVote.id },
+        });
+
+        return tx.post.update({
+          where: { id: postId },
+          data: { voteCount: { decrement: 1 } },
+        });
+      } else {
+        await tx.vote.create({
+          data: {
+            postId,
+            userId: dbUser.id,
+          },
+        });
+
+        return tx.post.update({
+          where: { id: postId },
+          data: { voteCount: { increment: 1 } },
+        });
+      }
+    });
   } catch {
     return { error: "Failed to toggle vote. Please try again." };
   }

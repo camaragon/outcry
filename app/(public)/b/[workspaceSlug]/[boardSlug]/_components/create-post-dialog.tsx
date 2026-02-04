@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -34,7 +33,6 @@ export function CreatePostDialog({
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const router = useRouter();
 
   const { execute, fieldErrors, error, isLoading } = useAction(createPost, {
     onSuccess: () => {
@@ -42,7 +40,6 @@ export function CreatePostDialog({
       setOpen(false);
       setTitle("");
       setBody("");
-      router.refresh();
     },
     onError: (error) => {
       toast.error(error);

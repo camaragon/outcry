@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -24,22 +23,16 @@ interface PostCardProps {
     category: { name: string; color: string } | null;
     _count: { comments: number };
   };
-  workspaceSlug: string;
-  boardSlug: string;
   hasVoted: boolean;
   isSignedIn: boolean;
 }
 
 export function PostCard({
   post,
-  workspaceSlug,
-  boardSlug,
   hasVoted,
   isSignedIn,
 }: PostCardProps) {
   const statusInfo = STATUS_LABELS[post.status] ?? STATUS_LABELS.OPEN;
-  const truncatedBody =
-    post.body.length > 150 ? post.body.slice(0, 150) + "…" : post.body;
 
   return (
     <div className="flex items-start gap-4 rounded-lg border p-4 transition hover:border-foreground/20 hover:shadow-sm">
@@ -49,10 +42,7 @@ export function PostCard({
         hasVoted={hasVoted}
         isSignedIn={isSignedIn}
       />
-      <Link
-        href={`/b/${workspaceSlug}/${boardSlug}/${post.id}`}
-        className="flex-1 min-w-0"
-      >
+      <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="font-medium text-foreground">{post.title}</h3>
           <Badge variant={statusInfo.variant} className="text-xs">
@@ -72,7 +62,7 @@ export function PostCard({
           )}
         </div>
         <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-          {truncatedBody}
+          {post.body}
         </p>
         <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
@@ -85,7 +75,7 @@ export function PostCard({
             })}
           </span>
         </div>
-      </Link>
+      </div>
     </div>
   );
 }

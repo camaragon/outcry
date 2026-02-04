@@ -6,15 +6,11 @@ import { PostCard } from "./post-card";
 interface PostListProps {
   boardId: string;
   workspaceId: string;
-  workspaceSlug: string;
-  boardSlug: string;
 }
 
 export async function PostList({
   boardId,
   workspaceId,
-  workspaceSlug,
-  boardSlug,
 }: PostListProps) {
   const [posts, user] = await Promise.all([
     db.post.findMany({
@@ -67,8 +63,6 @@ export async function PostList({
         <PostCard
           key={post.id}
           post={post}
-          workspaceSlug={workspaceSlug}
-          boardSlug={boardSlug}
           hasVoted={votedPostIds.has(post.id)}
           isSignedIn={isSignedIn}
         />
