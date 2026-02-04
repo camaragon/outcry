@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { ActionState, FieldErrors } from "@/lib/create-safe-action";
 
 type Action<TInput, TOutput> = (
@@ -22,6 +22,10 @@ export const useAction = <TInput, TOutput>(
   const [data, setData] = useState<TOutput | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  // Use ref to always access latest options without re-creating execute
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
   const execute = useCallback(
     async (input: TInput) => {
       setIsLoading(true);
@@ -35,19 +39,19 @@ export const useAction = <TInput, TOutput>(
 
         if (result.error) {
           setError(result.error);
-          options.onError?.(result.error);
+          optionsRef.current.onError?.(result.error);
         }
 
         if (result.data) {
           setData(result.data);
-          options.onSuccess?.(result.data);
+          optionsRef.current.onSuccess?.(result.data);
         }
       } finally {
         setIsLoading(false);
-        options.onComplete?.();
+        optionsRef.current.onComplete?.();
       }
     },
-    [action, options],
+    [action],
   );
 
   return {

@@ -1,15 +1,16 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { db } from "@/lib/db";
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
+  const user = await currentUser();
 
-  if (!userId) redirect("/sign-in");
+  if (!user?.id) redirect("/sign-in");
 
   // Find user's workspace
   const dbUser = await db.user.findFirst({
-    where: { clerkId: userId },
+    where: { clerkId: user.id },
     include: {
       workspace: {
         include: {
@@ -34,14 +35,13 @@ export default async function DashboardPage() {
   }
 
   const workspace = dbUser.workspace;
-  const user = await currentUser();
 
   return (
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">{workspace.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Welcome back, {user?.firstName || "there"}! Here&apos;s your workspace
+          Welcome back, {user.firstName || "there"}! Here&apos;s your workspace
           overview.
         </p>
       </div>
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
         <h2 className="mb-4 text-lg font-semibold">Your boards</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {workspace.boards.map((board) => (
-            <a
+            <Link
               key={board.id}
               href={`/dashboard/board/${board.id}`}
               className="group rounded-lg border p-4 transition hover:border-foreground/20 hover:shadow-sm"
@@ -83,7 +83,7 @@ export default async function DashboardPage() {
               <p className="mt-2 text-xs text-muted-foreground">
                 /{board.slug}
               </p>
-            </a>
+            </Link>
           ))}
         </div>
       </div>
