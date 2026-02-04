@@ -24,7 +24,7 @@ export const OnboardingForm = () => {
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
 
-  const { execute, fieldErrors, isLoading } = useAction(createWorkspace, {
+  const { execute, fieldErrors, error: actionError, isLoading } = useAction(createWorkspace, {
     onSuccess: () => {
       toast.success("Workspace created!");
       router.push("/dashboard");
@@ -51,6 +51,9 @@ export const OnboardingForm = () => {
     execute({ name, slug });
   };
 
+  const nameError = fieldErrors?.name?.[0];
+  const slugError = fieldErrors?.slug?.[0];
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <div className="space-y-2">
@@ -61,9 +64,13 @@ export const OnboardingForm = () => {
           value={name}
           onChange={(e) => handleNameChange(e.target.value)}
           disabled={isLoading}
+          aria-invalid={!!nameError}
+          aria-describedby={nameError ? "name-error" : undefined}
         />
-        {fieldErrors?.name && (
-          <p className="text-sm text-destructive">{fieldErrors.name[0]}</p>
+        {nameError && (
+          <p id="name-error" className="text-sm text-destructive" role="alert">
+            {nameError}
+          </p>
         )}
       </div>
 
@@ -80,10 +87,14 @@ export const OnboardingForm = () => {
             value={slug}
             onChange={(e) => handleSlugChange(e.target.value)}
             disabled={isLoading}
+            aria-invalid={!!slugError}
+            aria-describedby={slugError ? "slug-error" : undefined}
           />
         </div>
-        {fieldErrors?.slug && (
-          <p className="text-sm text-destructive">{fieldErrors.slug[0]}</p>
+        {slugError && (
+          <p id="slug-error" className="text-sm text-destructive" role="alert">
+            {slugError}
+          </p>
         )}
       </div>
 

@@ -44,6 +44,8 @@ export const useAction = <TInput, TOutput>(
 
         if (result.data) {
           setData(result.data);
+          setError(undefined);
+          setFieldErrors(undefined);
           optionsRef.current.onSuccess?.(result.data);
         }
       } finally {
