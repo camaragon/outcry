@@ -11,10 +11,10 @@ export default async function OnboardingPage() {
   // If user already has a workspace, redirect to dashboard
   const existingUser = await db.user.findFirst({
     where: { clerkId: userId },
-    include: { workspace: true },
+    select: { workspaceId: true },
   });
 
-  if (existingUser?.workspace) {
+  if (existingUser?.workspaceId) {
     redirect("/dashboard");
   }
 
