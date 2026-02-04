@@ -10,30 +10,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAction } from "@/hooks/use-action";
 import { updatePostStatus } from "@/actions/update-post-status";
-
-const STATUSES = [
-  { value: "OPEN", label: "Open" },
-  { value: "UNDER_REVIEW", label: "Under Review" },
-  { value: "PLANNED", label: "Planned" },
-  { value: "IN_PROGRESS", label: "In Progress" },
-  { value: "COMPLETE", label: "Complete" },
-  { value: "CLOSED", label: "Closed" },
-] as const;
-
-type StatusValue = (typeof STATUSES)[number]["value"];
-
-const STATUS_VARIANTS: Record<StatusValue, "default" | "secondary" | "outline"> = {
-  OPEN: "outline",
-  UNDER_REVIEW: "secondary",
-  PLANNED: "secondary",
-  IN_PROGRESS: "default",
-  COMPLETE: "default",
-  CLOSED: "outline",
-};
+import { POST_STATUSES, STATUS_LABELS, type PostStatus } from "@/lib/post-statuses";
 
 interface StatusDropdownProps {
   postId: string;
-  currentStatus: StatusValue;
+  currentStatus: PostStatus;
 }
 
 export function StatusDropdown({ postId, currentStatus }: StatusDropdownProps) {
@@ -46,31 +27,30 @@ export function StatusDropdown({ postId, currentStatus }: StatusDropdownProps) {
     },
   });
 
-  const currentLabel =
-    STATUSES.find((s) => s.value === currentStatus)?.label ?? currentStatus;
+  const currentInfo = STATUS_LABELS[currentStatus];
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild disabled={isLoading}>
         <button
           className="cursor-pointer"
-          aria-label={`Change status, current: ${currentLabel}`}
+          aria-label={`Change status, current: ${currentInfo.label}`}
         >
-          <Badge variant={STATUS_VARIANTS[currentStatus]} className="text-xs">
-            {currentLabel}
+          <Badge variant={currentInfo.variant} className="text-xs">
+            {currentInfo.label}
           </Badge>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {STATUSES.map((status) => (
+        {POST_STATUSES.map((status) => (
           <DropdownMenuItem
-            key={status.value}
-            onClick={() => execute({ postId, status: status.value })}
+            key={status}
+            onClick={() => execute({ postId, status })}
             className={
-              status.value === currentStatus ? "font-semibold" : undefined
+              status === currentStatus ? "font-semibold" : undefined
             }
           >
-            {status.label}
+            {STATUS_LABELS[status].label}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

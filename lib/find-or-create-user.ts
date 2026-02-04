@@ -9,6 +9,11 @@ export async function findOrCreateUser(
   clerkUser: ClerkUser,
   workspaceId: string,
 ): Promise<{ id: string }> {
+  const email = clerkUser.emailAddresses[0]?.emailAddress;
+  if (!email) {
+    throw new Error("No email address found on your account.");
+  }
+
   const existing = await db.user.findFirst({
     where: { clerkId: clerkUser.id, workspaceId },
     select: { id: true },
@@ -19,7 +24,7 @@ export async function findOrCreateUser(
   return db.user.create({
     data: {
       clerkId: clerkUser.id,
-      email: clerkUser.emailAddresses[0]?.emailAddress ?? "",
+      email,
       name:
         `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() ||
         null,

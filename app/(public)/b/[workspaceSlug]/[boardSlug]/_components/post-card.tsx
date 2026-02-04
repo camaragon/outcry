@@ -1,23 +1,15 @@
 import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { STATUS_LABELS, type PostStatus } from "@/lib/post-statuses";
 import { UpvoteButton } from "./upvote-button";
-
-const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
-  OPEN: { label: "Open", variant: "outline" },
-  UNDER_REVIEW: { label: "Under Review", variant: "secondary" },
-  PLANNED: { label: "Planned", variant: "secondary" },
-  IN_PROGRESS: { label: "In Progress", variant: "default" },
-  COMPLETE: { label: "Complete", variant: "default" },
-  CLOSED: { label: "Closed", variant: "outline" },
-};
 
 interface PostCardProps {
   post: {
     id: string;
     title: string;
     body: string;
-    status: string;
+    status: PostStatus;
     voteCount: number;
     createdAt: Date;
     category: { name: string; color: string } | null;
