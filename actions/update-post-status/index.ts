@@ -18,7 +18,12 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       select: {
         id: true,
         board: {
-          select: { id: true, workspaceId: true },
+          select: {
+            id: true,
+            workspaceId: true,
+            slug: true,
+            workspace: { select: { slug: true } },
+          },
         },
       },
     }),
@@ -58,6 +63,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   }
 
   revalidatePath(`/dashboard/board/${post.board.id}`);
+  revalidatePath(`/b/${post.board.workspace.slug}/${post.board.slug}`);
   return { data: updatedPost };
 };
 

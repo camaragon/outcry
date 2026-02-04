@@ -34,7 +34,7 @@ export function UpvoteButton({
     e.stopPropagation();
 
     if (!isSignedIn) {
-      router.push("/sign-in");
+      router.push(`/sign-in?redirect_url=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 

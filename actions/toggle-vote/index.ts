@@ -38,7 +38,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "Post not found." };
   }
 
-  const dbUser = await findOrCreateUser(user, post.board.workspaceId);
+  const userResult = await findOrCreateUser(user, post.board.workspaceId);
+  if (!userResult.ok) {
+    return { error: userResult.error };
+  }
 
   let updatedPost;
 
@@ -48,7 +51,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         where: {
           postId_userId: {
             postId,
-            userId: dbUser.id,
+            userId: userResult.id,
           },
         },
       });
@@ -66,7 +69,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         await tx.vote.create({
           data: {
             postId,
-            userId: dbUser.id,
+            userId: userResult.id,
           },
         });
 

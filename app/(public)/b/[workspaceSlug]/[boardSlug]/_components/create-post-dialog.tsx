@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -51,11 +52,13 @@ export function CreatePostDialog({
     execute({ title, body, boardId });
   };
 
+  const pathname = usePathname();
+
   // If not signed in, show a sign-in button instead
   if (!isSignedIn) {
     return (
       <Button asChild>
-        <Link href="/sign-in">
+        <Link href={`/sign-in?redirect_url=${encodeURIComponent(pathname)}`}>
           <Plus className="size-4" />
           Sign in to post
         </Link>

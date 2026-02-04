@@ -1,27 +1,39 @@
 import type { User as ClerkUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 
+type FindOrCreateResult =
+  | { ok: true; id: string }
+  | { ok: false; error: string };
+
 /**
  * Find an existing user record for a workspace, or create one
- * from the Clerk user profile. Returns the user's database id.
+ * from the Clerk user profile. Returns the user's database id
+ * or an error string.
  */
 export async function findOrCreateUser(
   clerkUser: ClerkUser,
   workspaceId: string,
-): Promise<{ id: string }> {
+): Promise<FindOrCreateResult> {
   const email = clerkUser.emailAddresses[0]?.emailAddress;
   if (!email) {
-    throw new Error("No email address found on your account.");
+    return { ok: false, error: "No email address found on your account." };
   }
 
-  const existing = await db.user.findFirst({
-    where: { clerkId: clerkUser.id, workspaceId },
-    select: { id: true },
+  // Schema has unique constraint on clerkId — check if this user
+  // already belongs to a different workspace
+  const existing = await db.user.findUnique({
+    where: { clerkId: clerkUser.id },
+    select: { id: true, workspaceId: true },
   });
 
-  if (existing) return existing;
+  if (existing) {
+    if (existing.workspaceId !== workspaceId) {
+      return { ok: false, error: "This account is already associated with a different workspace." };
+    }
+    return { ok: true, id: existing.id };
+  }
 
-  return db.user.create({
+  const created = await db.user.create({
     data: {
       clerkId: clerkUser.id,
       email,
@@ -34,4 +46,6 @@ export async function findOrCreateUser(
     },
     select: { id: true },
   });
+
+  return { ok: true, id: created.id };
 }

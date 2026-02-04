@@ -28,7 +28,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "Board not found." };
   }
 
-  const dbUser = await findOrCreateUser(user, board.workspaceId);
+  const userResult = await findOrCreateUser(user, board.workspaceId);
+  if (!userResult.ok) {
+    return { error: userResult.error };
+  }
 
   let post;
 
@@ -38,7 +41,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         title,
         body,
         boardId,
-        authorId: dbUser.id,
+        authorId: userResult.id,
       },
     });
   } catch {
