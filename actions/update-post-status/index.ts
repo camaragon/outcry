@@ -8,24 +8,25 @@ import { UpdatePostStatus } from "./schema";
 import { InputType, ReturnType } from "./types";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const user = await currentUser();
+  const { postId, status } = data;
+
+  // Parallelize independent calls
+  const [user, post] = await Promise.all([
+    currentUser(),
+    db.post.findUnique({
+      where: { id: postId },
+      select: {
+        id: true,
+        board: {
+          select: { id: true, workspaceId: true },
+        },
+      },
+    }),
+  ]);
 
   if (!user?.id) {
     return { error: "Unauthorized" };
   }
-
-  const { postId, status } = data;
-
-  // Look up the post + board + workspace
-  const post = await db.post.findUnique({
-    where: { id: postId },
-    select: {
-      id: true,
-      board: {
-        select: { id: true, workspaceId: true },
-      },
-    },
-  });
 
   if (!post) {
     return { error: "Post not found." };

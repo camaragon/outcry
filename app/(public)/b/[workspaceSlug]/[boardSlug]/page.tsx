@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { Megaphone } from "lucide-react";
 import { db } from "@/lib/db";
-import { PostCard } from "./_components/post-card";
+import { PostList } from "./_components/post-list";
+import { PostListSkeleton } from "./_components/post-list-skeleton";
 import { CreatePostDialog } from "./_components/create-post-dialog";
 
 interface PublicBoardPageProps {
@@ -15,11 +17,14 @@ interface PublicBoardPageProps {
 export default async function PublicBoardPage({ params }: PublicBoardPageProps) {
   const { workspaceSlug, boardSlug } = await params;
 
-  // Look up the workspace and board
-  const workspace = await db.workspace.findUnique({
-    where: { slug: workspaceSlug },
-    select: { id: true, name: true, logo: true },
-  });
+  // Parallelize independent calls
+  const [workspace, { userId }] = await Promise.all([
+    db.workspace.findUnique({
+      where: { slug: workspaceSlug },
+      select: { id: true, name: true, logo: true },
+    }),
+    auth(),
+  ]);
 
   if (!workspace) {
     notFound();
@@ -39,38 +44,7 @@ export default async function PublicBoardPage({ params }: PublicBoardPageProps) 
     notFound();
   }
 
-  // Fetch posts sorted by vote count desc, then newest
-  const posts = await db.post.findMany({
-    where: { boardId: board.id },
-    orderBy: [{ voteCount: "desc" }, { createdAt: "desc" }],
-    include: {
-      category: { select: { name: true, color: true } },
-      _count: { select: { comments: true } },
-    },
-  });
-
-  // Check current user and their votes
-  const user = await currentUser();
-  const isSignedIn = !!user?.id;
-
-  let votedPostIds = new Set<string>();
-  if (user?.id) {
-    const dbUser = await db.user.findFirst({
-      where: { clerkId: user.id, workspaceId: workspace.id },
-      select: { id: true },
-    });
-
-    if (dbUser) {
-      const votes = await db.vote.findMany({
-        where: {
-          userId: dbUser.id,
-          postId: { in: posts.map((p) => p.id) },
-        },
-        select: { postId: true },
-      });
-      votedPostIds = new Set(votes.map((v) => v.postId));
-    }
-  }
+  const isSignedIn = !!userId;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -99,29 +73,15 @@ export default async function PublicBoardPage({ params }: PublicBoardPageProps) 
         <CreatePostDialog boardId={board.id} isSignedIn={isSignedIn} />
       </div>
 
-      {/* Posts list */}
-      {posts.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-12 text-center">
-          <Megaphone className="mx-auto size-10 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-medium">No posts yet</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Be the first to share your feedback!
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              workspaceSlug={workspaceSlug}
-              boardSlug={boardSlug}
-              hasVoted={votedPostIds.has(post.id)}
-              isSignedIn={isSignedIn}
-            />
-          ))}
-        </div>
-      )}
+      {/* Posts list — streamed with Suspense */}
+      <Suspense fallback={<PostListSkeleton />}>
+        <PostList
+          boardId={board.id}
+          workspaceId={workspace.id}
+          workspaceSlug={workspaceSlug}
+          boardSlug={boardSlug}
+        />
+      </Suspense>
     </div>
   );
 }

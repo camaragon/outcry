@@ -8,7 +8,16 @@ import { CreatePost } from "./schema";
 import { InputType, ReturnType } from "./types";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const user = await currentUser();
+  const { title, body, boardId } = data;
+
+  // Parallelize independent calls
+  const [user, board] = await Promise.all([
+    currentUser(),
+    db.board.findUnique({
+      where: { id: boardId },
+      select: { id: true, workspaceId: true, slug: true, workspace: { select: { slug: true } } },
+    }),
+  ]);
 
   if (!user?.id) {
     return { error: "You must be signed in to create a post." };
@@ -18,14 +27,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   if (!email) {
     return { error: "No email address found on your account." };
   }
-
-  const { title, body, boardId } = data;
-
-  // Look up the board + workspace
-  const board = await db.board.findUnique({
-    where: { id: boardId },
-    select: { id: true, workspaceId: true, slug: true, workspace: { select: { slug: true } } },
-  });
 
   if (!board) {
     return { error: "Board not found." };
