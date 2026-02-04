@@ -24,7 +24,7 @@ export const OnboardingForm = () => {
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
 
-  const { execute, fieldErrors, error: actionError, isLoading } = useAction(createWorkspace, {
+  const { execute, fieldErrors, isLoading } = useAction(createWorkspace, {
     onSuccess: () => {
       toast.success("Workspace created!");
       router.push("/dashboard");
