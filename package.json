@@ -8,12 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:push": "dotenv -e .env.local -- prisma db push",
+    "db:studio": "dotenv -e .env.local -- prisma studio"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.2",
-    "@prisma/client": "^7.3.0",
+    "@prisma/client": "^6.19.2",
     "@tanstack/react-query": "^5.90.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -21,7 +21,7 @@
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "openai": "^6.17.0",
-    "prisma": "^7.3.0",
+    "prisma": "^6.19.2",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
