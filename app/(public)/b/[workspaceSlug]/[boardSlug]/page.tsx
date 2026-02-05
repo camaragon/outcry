@@ -1,9 +1,12 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { Megaphone } from "lucide-react";
+import Link from "next/link";
+import { Megaphone, Settings } from "lucide-react";
 import { db } from "@/lib/db";
+import { getAuthorizedUser } from "@/lib/get-authorized-user";
 import { POST_STATUSES } from "@/lib/post-statuses";
+import { Button } from "@/components/ui/button";
 import { PostList } from "./_components/post-list";
 import { PostListSkeleton } from "./_components/post-list-skeleton";
 import { CreatePostDialog } from "./_components/create-post-dialog";
@@ -57,7 +60,7 @@ export default async function PublicBoardPage({
     notFound();
   }
 
-  const [board, categories] = await Promise.all([
+  const [board, categories, adminUser] = await Promise.all([
     db.board.findUnique({
       where: {
         workspaceId_slug: {
@@ -72,6 +75,8 @@ export default async function PublicBoardPage({
       select: { id: true, name: true, color: true },
       orderBy: { name: "asc" },
     }),
+    // Check if current user is an admin (runs in parallel)
+    userId ? getAuthorizedUser(userId, workspace.id) : null,
   ]);
 
   if (!board || !board.isPublic) {
@@ -79,6 +84,7 @@ export default async function PublicBoardPage({
   }
 
   const isSignedIn = !!userId;
+  const isAdmin = !!adminUser;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -96,10 +102,18 @@ export default async function PublicBoardPage({
             <Megaphone className="size-5" />
           </div>
         )}
-        <div>
+        <div className="flex-1">
           <p className="text-sm text-muted-foreground">{workspace.name}</p>
           <h1 className="text-2xl font-bold">{board.name}</h1>
         </div>
+        {isAdmin && (
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/dashboard/board/${board.id}`}>
+              <Settings className="size-4" />
+              Admin
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* New post button */}
