@@ -48,7 +48,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "Failed to delete category. Please try again." };
   }
 
+  // Revalidate all paths where categories appear
   revalidatePath("/dashboard/categories");
+  revalidatePath("/dashboard", "layout");
+  revalidatePath("/b", "layout");
   return { data: category };
 };
 

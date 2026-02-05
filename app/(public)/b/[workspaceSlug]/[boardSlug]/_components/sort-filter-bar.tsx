@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback } from "react";
 import { ArrowDownUp, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ const SORT_OPTIONS = [
   { value: "new", label: "New" },
   { value: "trending", label: "Trending" },
 ] as const;
+
+const DEFAULT_SORT = "top";
 
 interface Category {
   id: string;
@@ -39,20 +41,26 @@ export function SortFilterBar({
   currentCategory,
 }: SortFilterBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const updateParam = useCallback(
     (key: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (value === "" || value === "all") {
+      // Remove param if it's empty, "all", or the default sort value
+      const isDefault =
+        value === "" ||
+        value === "all" ||
+        (key === "sort" && value === DEFAULT_SORT);
+      if (isDefault) {
         params.delete(key);
       } else {
         params.set(key, value);
       }
       const qs = params.toString();
-      router.push(qs ? `?${qs}` : "?", { scroll: false });
+      router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
-    [router, searchParams],
+    [router, pathname, searchParams],
   );
 
   return (

@@ -3,10 +3,13 @@ import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { Megaphone } from "lucide-react";
 import { db } from "@/lib/db";
+import { POST_STATUSES } from "@/lib/post-statuses";
 import { PostList } from "./_components/post-list";
 import { PostListSkeleton } from "./_components/post-list-skeleton";
 import { CreatePostDialog } from "./_components/create-post-dialog";
 import { SortFilterBar } from "./_components/sort-filter-bar";
+
+const VALID_SORTS = ["top", "new", "trending"] as const;
 
 interface PublicBoardPageProps {
   params: Promise<{
@@ -27,8 +30,18 @@ export default async function PublicBoardPage({
   const [{ workspaceSlug, boardSlug }, resolvedSearchParams] =
     await Promise.all([params, searchParams]);
 
-  const sort = resolvedSearchParams.sort ?? "top";
-  const status = resolvedSearchParams.status ?? "";
+  // Validate sort param against known values
+  const requestedSort = resolvedSearchParams.sort;
+  const sort = requestedSort && VALID_SORTS.includes(requestedSort as typeof VALID_SORTS[number])
+    ? requestedSort
+    : "top";
+
+  // Validate status param against known statuses
+  const requestedStatus = resolvedSearchParams.status;
+  const status = requestedStatus && POST_STATUSES.includes(requestedStatus as typeof POST_STATUSES[number])
+    ? requestedStatus
+    : "";
+
   const category = resolvedSearchParams.category ?? "";
 
   // Parallelize independent calls

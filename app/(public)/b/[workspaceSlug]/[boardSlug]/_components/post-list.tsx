@@ -30,8 +30,15 @@ export async function PostList({
     where.status = status as Prisma.EnumPostStatusFilter;
   }
 
+  // Validate categoryId belongs to this workspace before using it
   if (categoryId) {
-    where.categoryId = categoryId;
+    const validCategory = await db.category.findFirst({
+      where: { id: categoryId, workspaceId },
+      select: { id: true },
+    });
+    if (validCategory) {
+      where.categoryId = validCategory.id;
+    }
   }
 
   // For trending: only posts from last 30 days
