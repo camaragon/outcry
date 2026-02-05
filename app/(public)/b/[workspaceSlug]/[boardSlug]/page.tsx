@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { Megaphone, Settings } from "lucide-react";
 import { db } from "@/lib/db";
+import { getAuthorizedUser } from "@/lib/get-authorized-user";
 import { POST_STATUSES } from "@/lib/post-statuses";
 import { Button } from "@/components/ui/button";
 import { PostList } from "./_components/post-list";
@@ -59,7 +60,7 @@ export default async function PublicBoardPage({
     notFound();
   }
 
-  const [board, categories] = await Promise.all([
+  const [board, categories, adminUser] = await Promise.all([
     db.board.findUnique({
       where: {
         workspaceId_slug: {
@@ -74,6 +75,8 @@ export default async function PublicBoardPage({
       select: { id: true, name: true, color: true },
       orderBy: { name: "asc" },
     }),
+    // Check if current user is an admin (runs in parallel)
+    userId ? getAuthorizedUser(userId, workspace.id) : null,
   ]);
 
   if (!board || !board.isPublic) {
@@ -81,20 +84,7 @@ export default async function PublicBoardPage({
   }
 
   const isSignedIn = !!userId;
-
-  // Check if current user is an admin of this workspace
-  let isAdmin = false;
-  if (userId) {
-    const adminUser = await db.user.findFirst({
-      where: {
-        clerkId: userId,
-        workspaceId: workspace.id,
-        role: { in: ["OWNER", "ADMIN"] },
-      },
-      select: { id: true },
-    });
-    isAdmin = !!adminUser;
-  }
+  const isAdmin = !!adminUser;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
