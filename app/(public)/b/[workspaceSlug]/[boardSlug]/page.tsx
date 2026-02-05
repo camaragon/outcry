@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { getAuthorizedUser } from "@/lib/get-authorized-user";
 import { POST_STATUSES } from "@/lib/post-statuses";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { PostList } from "./_components/post-list";
 import { PostListSkeleton } from "./_components/post-list-skeleton";
 import { CreatePostDialog } from "./_components/create-post-dialog";
@@ -106,14 +107,17 @@ export default async function PublicBoardPage({
           <p className="text-sm text-muted-foreground">{workspace.name}</p>
           <h1 className="text-2xl font-bold">{board.name}</h1>
         </div>
-        {isAdmin && (
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/board/${board.id}`}>
-              <Settings className="size-4" />
-              Admin
-            </Link>
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/dashboard/board/${board.id}`}>
+                <Settings className="size-4" />
+                Admin
+              </Link>
+            </Button>
+          )}
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* New post button */}
