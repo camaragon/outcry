@@ -4,6 +4,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { findOrCreateUser } from "@/lib/find-or-create-user";
+import { generateEmbedding } from "@/lib/embeddings";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { CreatePost } from "./schema";
 import { InputType, ReturnType } from "./types";
@@ -47,6 +48,17 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   } catch {
     return { error: "Failed to create post. Please try again." };
   }
+
+  // Fire-and-forget: generate embedding asynchronously
+  generateEmbedding(`${title} ${body}`)
+    .then(async (embedding) => {
+      if (!embedding) return;
+      const embeddingStr = `[${embedding.join(",")}]`;
+      await db.$executeRaw`
+        UPDATE "Post" SET embedding = ${embeddingStr}::vector WHERE id = ${post.id}
+      `;
+    })
+    .catch(console.error);
 
   revalidatePath(`/b/${board.workspace.slug}/${board.slug}`);
   return { data: post };
