@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { db } from "@/lib/db";
 import { findSimilarPosts } from "@/lib/similar-posts";
 
 const RequestSchema = z.object({
@@ -47,6 +48,19 @@ export async function POST(req: NextRequest) {
     }
 
     const { title, boardId } = parsed.data;
+
+    // Verify board exists and is public before returning similar posts
+    const board = await db.board.findUnique({
+      where: { id: boardId },
+      select: { isPublic: true },
+    });
+
+    if (!board?.isPublic) {
+      return NextResponse.json(
+        { error: "Board not found" },
+        { status: 404 },
+      );
+    }
 
     const similarPosts = await findSimilarPosts(title, boardId, {
       limit: 5,

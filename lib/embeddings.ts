@@ -1,12 +1,16 @@
 import OpenAI from "openai";
 
 let client: OpenAI | null = null;
+let warnedMissingKey = false;
 
 function getClient(): OpenAI | null {
   if (!process.env.OPENAI_API_KEY) {
-    console.warn(
-      "[embeddings] OPENAI_API_KEY is not set — skipping embedding generation",
-    );
+    if (!warnedMissingKey) {
+      console.warn(
+        "[embeddings] OPENAI_API_KEY is not set — skipping embedding generation",
+      );
+      warnedMissingKey = true;
+    }
     return null;
   }
   if (!client) {
@@ -21,10 +25,15 @@ export async function generateEmbedding(
   const openai = getClient();
   if (!openai) return null;
 
-  const response = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: text,
-  });
+  try {
+    const response = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: text,
+    });
 
-  return response.data[0].embedding;
+    return response.data[0].embedding;
+  } catch (error) {
+    console.error("[embeddings] Failed to generate embedding:", error);
+    return null;
+  }
 }

@@ -71,6 +71,11 @@ export function CreatePostDialog({
   const handleOpenChange = (val: boolean) => {
     setOpen(val);
     if (!val) {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
+      abortRef.current?.abort();
       setTitle("");
       setBody("");
       setSimilarPosts([]);
@@ -216,6 +221,7 @@ export function CreatePostDialog({
                         key={post.id}
                         type="button"
                         onClick={() => handleSuggestionClick(post.id)}
+                        aria-label={`View similar post: ${post.title}`}
                         className="flex w-full items-start gap-3 rounded-md p-2 text-left transition hover:bg-background"
                       >
                         <div className="flex items-center gap-1 shrink-0 pt-0.5 text-xs text-muted-foreground">
