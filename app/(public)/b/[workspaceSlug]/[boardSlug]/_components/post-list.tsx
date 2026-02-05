@@ -1,5 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { Megaphone } from "lucide-react";
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PostCard } from "./post-card";
 
@@ -8,6 +9,9 @@ interface PostListProps {
   workspaceId: string;
   workspaceSlug: string;
   boardSlug: string;
+  sort?: string;
+  status?: string;
+  categoryId?: string;
 }
 
 export async function PostList({
@@ -15,11 +19,45 @@ export async function PostList({
   workspaceId,
   workspaceSlug,
   boardSlug,
+  sort = "top",
+  status,
+  categoryId,
 }: PostListProps) {
+  // Build where clause
+  const where: Prisma.PostWhereInput = { boardId };
+
+  if (status) {
+    where.status = status as Prisma.EnumPostStatusFilter;
+  }
+
+  // Validate categoryId belongs to this workspace before using it
+  if (categoryId) {
+    const validCategory = await db.category.findFirst({
+      where: { id: categoryId, workspaceId },
+      select: { id: true },
+    });
+    if (validCategory) {
+      where.categoryId = validCategory.id;
+    }
+  }
+
+  // For trending: only posts from last 30 days
+  if (sort === "trending") {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    where.createdAt = { gte: thirtyDaysAgo };
+  }
+
+  // Build orderBy — "new" sorts by date, everything else by votes
+  const orderBy: Prisma.PostOrderByWithRelationInput[] =
+    sort === "new"
+      ? [{ createdAt: "desc" }]
+      : [{ voteCount: "desc" }, { createdAt: "desc" }];
+
   const [posts, user] = await Promise.all([
     db.post.findMany({
-      where: { boardId },
-      orderBy: [{ voteCount: "desc" }, { createdAt: "desc" }],
+      where,
+      orderBy,
       include: {
         category: { select: { name: true, color: true } },
         _count: { select: { comments: true } },
@@ -55,7 +93,9 @@ export async function PostList({
         <Megaphone className="mx-auto size-10 text-muted-foreground" />
         <h3 className="mt-4 text-lg font-medium">No posts yet</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Be the first to share your feedback!
+          {status || categoryId
+            ? "No posts match the current filters."
+            : "Be the first to share your feedback!"}
         </p>
       </div>
     );

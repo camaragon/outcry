@@ -1,7 +1,9 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Tags } from "lucide-react";
 import { db } from "@/lib/db";
+import { Button } from "@/components/ui/button";
 
 export default async function DashboardPage() {
   const user = await currentUser();
@@ -62,6 +64,16 @@ export default async function DashboardPage() {
           <p className="text-sm text-muted-foreground">Team Members</p>
           <p className="text-2xl font-bold">{workspace._count.users}</p>
         </div>
+      </div>
+
+      {/* Quick links */}
+      <div className="mb-8">
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/dashboard/categories">
+            <Tags className="size-4" />
+            Manage Categories
+          </Link>
+        </Button>
       </div>
 
       {/* Boards */}
