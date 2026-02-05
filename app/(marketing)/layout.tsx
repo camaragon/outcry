@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function MarketingLayout({
   children,
@@ -31,6 +32,7 @@ export default function MarketingLayout({
             >
               Get started
             </Link>
+            <ThemeToggle />
           </div>
         </div>
       </nav>

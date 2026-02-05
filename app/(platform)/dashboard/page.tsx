@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Tags } from "lucide-react";
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function DashboardPage() {
   const user = await currentUser();
@@ -40,12 +41,15 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">{workspace.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Welcome back, {user.firstName || "there"}! Here&apos;s your workspace
-          overview.
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">{workspace.name}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Welcome back, {user.firstName || "there"}! Here&apos;s your workspace
+            overview.
+          </p>
+        </div>
+        <ThemeToggle />
       </div>
 
       {/* Stats */}
