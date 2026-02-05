@@ -70,6 +70,13 @@ export async function POST(req: Request) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  console.log("[STRIPE_WEBHOOK] checkout.session.completed received", {
+    sessionId: session.id,
+    metadata: session.metadata,
+    subscription: session.subscription,
+    customer: session.customer,
+  });
+
   const workspaceId = session.metadata?.workspaceId;
   if (!workspaceId) {
     console.error("[STRIPE_WEBHOOK] No workspaceId in session metadata");
@@ -79,8 +86,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const subscriptionId = session.subscription as string;
   const customerId = session.customer as string;
 
+  if (!subscriptionId) {
+    console.error("[STRIPE_WEBHOOK] No subscription ID in session");
+    return;
+  }
+
   // Fetch subscription to get price and period end
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  console.log("[STRIPE_WEBHOOK] Retrieved subscription", {
+    id: subscription.id,
+    status: subscription.status,
+    priceId: subscription.items.data[0]?.price.id,
+  });
 
   await db.workspace.update({
     where: { id: workspaceId },
