@@ -52,6 +52,7 @@ export function CreatePostDialog({
   const [similarPosts, setSimilarPosts] = useState<SimilarPost[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const router = useRouter();
 
   const { execute, fieldErrors, error, isLoading } = useAction(createPost, {
@@ -67,8 +68,18 @@ export function CreatePostDialog({
     },
   });
 
+  const handleOpenChange = (val: boolean) => {
+    setOpen(val);
+    if (!val) {
+      setTitle("");
+      setBody("");
+      setSimilarPosts([]);
+      setIsSearching(false);
+    }
+  };
+
   const searchSimilarPosts = useCallback(
-    async (searchTitle: string) => {
+    async (searchTitle: string, signal: AbortSignal) => {
       if (searchTitle.length < 5) {
         setSimilarPosts([]);
         return;
@@ -80,13 +91,15 @@ export function CreatePostDialog({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title: searchTitle, boardId }),
+          signal,
         });
 
         if (res.ok) {
           const data = await res.json();
           setSimilarPosts(data);
         }
-      } catch {
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         // Silently fail — similar posts is a nice-to-have
       } finally {
         setIsSearching(false);
@@ -99,20 +112,25 @@ export function CreatePostDialog({
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
+    abortRef.current?.abort();
 
     if (title.length < 5) {
       setSimilarPosts([]);
       return;
     }
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     debounceTimer.current = setTimeout(() => {
-      searchSimilarPosts(title);
+      searchSimilarPosts(title, controller.signal);
     }, 500);
 
     return () => {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
       }
+      controller.abort();
     };
   }, [title, searchSimilarPosts]);
 
@@ -141,7 +159,7 @@ export function CreatePostDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="size-4" />

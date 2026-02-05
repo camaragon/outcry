@@ -26,16 +26,15 @@ export async function findSimilarPosts(
 
   const embeddingStr = `[${embedding.join(",")}]`;
 
-  const results = await db.$queryRaw<SimilarPost[]>`
-    SELECT id, title, body, "voteCount", status,
+  return db.$queryRaw<SimilarPost[]>`
+    SELECT id, title, LEFT(body, 200) as body, "voteCount", status,
            1 - (embedding <=> ${embeddingStr}::vector) as similarity
     FROM "Post"
     WHERE "boardId" = ${boardId}
       AND embedding IS NOT NULL
+      AND 1 - (embedding <=> ${embeddingStr}::vector) >= ${threshold}
       ${excludePostId ? Prisma.sql`AND id != ${excludePostId}` : Prisma.empty}
     ORDER BY embedding <=> ${embeddingStr}::vector ASC
     LIMIT ${limit}
   `;
-
-  return results.filter((r) => r.similarity >= threshold);
 }
