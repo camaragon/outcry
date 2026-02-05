@@ -78,6 +78,8 @@ export default async function PublicBoardPage({ params }: PublicBoardPageProps) 
         <PostList
           boardId={board.id}
           workspaceId={workspace.id}
+          workspaceSlug={workspaceSlug}
+          boardSlug={boardSlug}
         />
       </Suspense>
     </div>
