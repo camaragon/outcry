@@ -3,6 +3,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { getAuthorizedUser } from "@/lib/get-authorized-user";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { CreateCategory } from "./schema";
 import { InputType, ReturnType } from "./types";
@@ -16,15 +17,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "Unauthorized" };
   }
 
-  // Verify the user is OWNER or ADMIN in this workspace
-  const dbUser = await db.user.findFirst({
-    where: {
-      clerkId: user.id,
-      workspaceId,
-      role: { in: ["OWNER", "ADMIN"] },
-    },
-    select: { id: true },
-  });
+  const dbUser = await getAuthorizedUser(user.id, workspaceId);
 
   if (!dbUser) {
     return { error: "You do not have permission to manage categories." };

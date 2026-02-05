@@ -41,20 +41,11 @@ export async function PostList({
     where.createdAt = { gte: thirtyDaysAgo };
   }
 
-  // Build orderBy
-  let orderBy: Prisma.PostOrderByWithRelationInput[];
-  switch (sort) {
-    case "new":
-      orderBy = [{ createdAt: "desc" }];
-      break;
-    case "trending":
-      orderBy = [{ voteCount: "desc" }, { createdAt: "desc" }];
-      break;
-    case "top":
-    default:
-      orderBy = [{ voteCount: "desc" }, { createdAt: "desc" }];
-      break;
-  }
+  // Build orderBy — "new" sorts by date, everything else by votes
+  const orderBy: Prisma.PostOrderByWithRelationInput[] =
+    sort === "new"
+      ? [{ createdAt: "desc" }]
+      : [{ voteCount: "desc" }, { createdAt: "desc" }];
 
   const [posts, user] = await Promise.all([
     db.post.findMany({

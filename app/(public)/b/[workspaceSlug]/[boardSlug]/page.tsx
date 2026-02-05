@@ -99,7 +99,10 @@ export default async function PublicBoardPage({
         />
       </div>
 
-      {/* Sort & Filter Bar */}
+      {/* Sort & Filter Bar
+          Note: categories fetched at page level blocks initial render, but this is
+          acceptable since categories are a small indexed lookup (<10 rows typically).
+          Alternative would be streaming categories through a shared Suspense boundary. */}
       <SortFilterBar
         categories={categories}
         currentSort={sort}
