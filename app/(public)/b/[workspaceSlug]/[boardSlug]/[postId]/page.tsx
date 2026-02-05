@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
@@ -5,12 +6,11 @@ import { ArrowLeft, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { db } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { STATUS_LABELS, type PostStatus } from "@/lib/post-statuses";
 import { UpvoteButton } from "../_components/upvote-button";
-import { CommentList } from "./_components/comment-list";
-import { CommentForm } from "./_components/comment-form";
+import { CommentsSection } from "./_components/comments-section";
+import { CommentsSkeleton } from "./_components/comments-skeleton";
 
 interface PostDetailPageProps {
   params: Promise<{
@@ -55,12 +55,6 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     include: {
       author: { select: { name: true, email: true } },
       category: { select: { name: true, color: true } },
-      comments: {
-        orderBy: { createdAt: "asc" },
-        include: {
-          author: { select: { name: true, email: true } },
-        },
-      },
       _count: { select: { comments: true } },
     },
   });
@@ -71,25 +65,17 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
   const isSignedIn = !!user?.id;
 
-  // Check if user has voted
+  // Check if user has voted — single query via nested relation
   let hasVoted = false;
   if (user?.id) {
-    const dbUser = await db.user.findFirst({
-      where: { clerkId: user.id, workspaceId: workspace.id },
+    const vote = await db.vote.findFirst({
+      where: {
+        postId: post.id,
+        user: { clerkId: user.id, workspaceId: workspace.id },
+      },
       select: { id: true },
     });
-
-    if (dbUser) {
-      const vote = await db.vote.findUnique({
-        where: {
-          postId_userId: {
-            postId: post.id,
-            userId: dbUser.id,
-          },
-        },
-      });
-      hasVoted = !!vote;
-    }
+    hasVoted = !!vote;
   }
 
   const statusInfo = STATUS_LABELS[post.status as PostStatus] ?? STATUS_LABELS.OPEN;
@@ -164,26 +150,9 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         </h2>
 
         <div className="mt-4">
-          <CommentList comments={post.comments} />
-        </div>
-
-        <div className="mt-6">
-          {isSignedIn ? (
-            <CommentForm postId={post.id} />
-          ) : (
-            <div className="rounded-lg border border-dashed p-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                <Button variant="link" className="h-auto p-0" asChild>
-                  <Link
-                    href={`/sign-in?redirect_url=${encodeURIComponent(currentPath)}`}
-                  >
-                    Sign in
-                  </Link>
-                </Button>{" "}
-                to leave a comment
-              </p>
-            </div>
-          )}
+          <Suspense fallback={<CommentsSkeleton />}>
+            <CommentsSection postId={post.id} currentPath={currentPath} />
+          </Suspense>
         </div>
       </div>
     </div>

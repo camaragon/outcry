@@ -42,13 +42,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: userResult.error };
   }
 
-  // Check if user is OWNER or ADMIN for admin badge
-  const dbUser = await db.user.findUnique({
-    where: { id: userResult.id },
-    select: { role: true },
-  });
-
-  const isAdmin = dbUser?.role === "OWNER" || dbUser?.role === "ADMIN";
+  const isAdmin = userResult.role === "OWNER" || userResult.role === "ADMIN";
 
   let comment;
 

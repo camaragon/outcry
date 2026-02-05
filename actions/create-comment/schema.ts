@@ -3,7 +3,7 @@ import { z } from "zod";
 export const CreateComment = z.object({
   body: z
     .string()
-    .min(1, { message: "Comment cannot be empty" })
-    .max(5000, { message: "Comment must be less than 5000 characters" }),
+    .min(3, { message: "Comment must be at least 3 characters" })
+    .max(2000, { message: "Comment must be less than 2000 characters" }),
   postId: z.string().uuid({ message: "Invalid post" }),
 });

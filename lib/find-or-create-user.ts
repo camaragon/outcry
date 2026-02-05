@@ -1,8 +1,10 @@
 import type { User as ClerkUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 
+import type { Role } from "@prisma/client";
+
 type FindOrCreateResult =
-  | { ok: true; id: string }
+  | { ok: true; id: string; role: Role }
   | { ok: false; error: string };
 
 /**
@@ -23,14 +25,14 @@ export async function findOrCreateUser(
   // already belongs to a different workspace
   const existing = await db.user.findUnique({
     where: { clerkId: clerkUser.id },
-    select: { id: true, workspaceId: true },
+    select: { id: true, workspaceId: true, role: true },
   });
 
   if (existing) {
     if (existing.workspaceId !== workspaceId) {
       return { ok: false, error: "This account is already associated with a different workspace." };
     }
-    return { ok: true, id: existing.id };
+    return { ok: true, id: existing.id, role: existing.role };
   }
 
   const created = await db.user.create({
@@ -44,8 +46,8 @@ export async function findOrCreateUser(
       role: "USER",
       workspaceId,
     },
-    select: { id: true },
+    select: { id: true, role: true },
   });
 
-  return { ok: true, id: created.id };
+  return { ok: true, id: created.id, role: created.role };
 }
