@@ -59,9 +59,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "Failed to create comment. Please try again." };
   }
 
-  revalidatePath(
-    `/b/${post.board.workspace.slug}/${post.board.slug}/${postId}`,
-  );
+  const boardPath = `/b/${post.board.workspace.slug}/${post.board.slug}`;
+  revalidatePath(boardPath);
+  revalidatePath(`${boardPath}/${postId}`);
   return { data: comment };
 };
 
