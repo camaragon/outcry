@@ -1,9 +1,11 @@
 "use server";
 
 import { currentUser } from "@clerk/nextjs/server";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { findOrCreateUser } from "@/lib/find-or-create-user";
+import { generateEmbedding } from "@/lib/embeddings";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { CreatePost } from "./schema";
 import { InputType, ReturnType } from "./types";
@@ -47,6 +49,20 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   } catch {
     return { error: "Failed to create post. Please try again." };
   }
+
+  // Generate embedding after response is sent (survives serverless shutdown)
+  after(async () => {
+    try {
+      const embedding = await generateEmbedding(`${title} ${body}`);
+      if (!embedding) return;
+      const embeddingStr = `[${embedding.join(",")}]`;
+      await db.$executeRaw`
+        UPDATE "Post" SET embedding = ${embeddingStr}::vector WHERE id = ${post.id}
+      `;
+    } catch (err) {
+      console.error("[embedding] Failed to generate embedding:", err);
+    }
+  });
 
   revalidatePath(`/b/${board.workspace.slug}/${board.slug}`);
   return { data: post };

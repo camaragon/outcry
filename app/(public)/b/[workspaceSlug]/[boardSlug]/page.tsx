@@ -70,7 +70,12 @@ export default async function PublicBoardPage({ params }: PublicBoardPageProps) 
 
       {/* New post button */}
       <div className="mb-6">
-        <CreatePostDialog boardId={board.id} isSignedIn={isSignedIn} />
+        <CreatePostDialog
+          boardId={board.id}
+          isSignedIn={isSignedIn}
+          workspaceSlug={workspaceSlug}
+          boardSlug={boardSlug}
+        />
       </div>
 
       {/* Posts list — streamed with Suspense */}
