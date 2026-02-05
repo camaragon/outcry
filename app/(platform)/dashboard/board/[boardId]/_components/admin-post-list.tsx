@@ -3,21 +3,39 @@ import { formatDistanceToNow } from "date-fns";
 import { db } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
 import { StatusDropdown } from "./status-dropdown";
+import { CategoryDropdown } from "./category-dropdown";
 
 interface AdminPostListProps {
   boardId: string;
 }
 
 export async function AdminPostList({ boardId }: AdminPostListProps) {
-  const posts = await db.post.findMany({
-    where: { boardId },
-    orderBy: [{ voteCount: "desc" }, { createdAt: "desc" }],
-    include: {
-      author: { select: { name: true, email: true } },
-      category: { select: { name: true, color: true } },
-      _count: { select: { comments: true } },
-    },
+  // Get the board to find its workspace
+  const board = await db.board.findUnique({
+    where: { id: boardId },
+    select: { workspaceId: true },
   });
+
+  if (!board) {
+    return null;
+  }
+
+  const [posts, categories] = await Promise.all([
+    db.post.findMany({
+      where: { boardId },
+      orderBy: [{ voteCount: "desc" }, { createdAt: "desc" }],
+      include: {
+        author: { select: { name: true, email: true } },
+        category: { select: { id: true, name: true, color: true } },
+        _count: { select: { comments: true } },
+      },
+    }),
+    db.category.findMany({
+      where: { workspaceId: board.workspaceId },
+      select: { id: true, name: true, color: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   if (posts.length === 0) {
     return (
@@ -52,18 +70,11 @@ export async function AdminPostList({ boardId }: AdminPostListProps) {
                 postId={post.id}
                 currentStatus={post.status}
               />
-              {post.category && (
-                <Badge
-                  variant="outline"
-                  className="text-xs"
-                  style={{
-                    borderColor: post.category.color,
-                    color: post.category.color,
-                  }}
-                >
-                  {post.category.name}
-                </Badge>
-              )}
+              <CategoryDropdown
+                postId={post.id}
+                currentCategory={post.category}
+                categories={categories}
+              />
             </div>
             <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
               {post.body}
