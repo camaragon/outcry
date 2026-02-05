@@ -3,6 +3,16 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 
+const getAppUrl = () => {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+};
+
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
@@ -38,11 +48,13 @@ export async function POST(req: Request) {
       );
     }
 
+    const appUrl = getAppUrl();
+
     // If already pro, redirect to billing portal
     if (workspace.stripeSubscriptionId && workspace.stripeCustomerId) {
       const portalSession = await stripe.billingPortal.sessions.create({
         customer: workspace.stripeCustomerId,
-        return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+        return_url: `${appUrl}/dashboard`,
       });
       return NextResponse.json({ url: portalSession.url });
     }
@@ -72,8 +84,8 @@ export async function POST(req: Request) {
           workspaceId: workspace.id,
         },
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?canceled=true`,
+      success_url: `${appUrl}/dashboard?success=true`,
+      cancel_url: `${appUrl}/dashboard?canceled=true`,
     });
 
     return NextResponse.json({ url: checkoutSession.url });
