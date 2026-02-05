@@ -1,7 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { db } from "@/lib/db";
-import { Badge } from "@/components/ui/badge";
 import { StatusDropdown } from "./status-dropdown";
 import { CategoryDropdown } from "./category-dropdown";
 
