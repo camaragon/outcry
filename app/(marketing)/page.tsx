@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { LucideIcon, Sparkles, MessageSquare, BarChart3, Zap, Check, ArrowRight } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { Sparkles, MessageSquare, BarChart3, Zap, Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
