@@ -39,11 +39,11 @@ export default function PricingPage() {
                 <PricingFeature included>1 feedback board</PricingFeature>
                 <PricingFeature included>Up to 50 posts</PricingFeature>
                 <PricingFeature included>Unlimited voters</PricingFeature>
+                <PricingFeature included>Public roadmap</PricingFeature>
                 <PricingFeature included>Basic status management</PricingFeature>
                 <PricingFeature included>Community support</PricingFeature>
                 <PricingFeature>AI duplicate detection</PricingFeature>
                 <PricingFeature>Custom branding</PricingFeature>
-                <PricingFeature>Public roadmap</PricingFeature>
                 <PricingFeature>Priority support</PricingFeature>
               </ul>
             </div>
@@ -78,7 +78,6 @@ export default function PricingPage() {
                 <PricingFeature included>Unlimited team members</PricingFeature>
                 <PricingFeature included>AI duplicate detection</PricingFeature>
                 <PricingFeature included>Custom branding</PricingFeature>
-                <PricingFeature included>Public roadmap</PricingFeature>
                 <PricingFeature included>Remove Outcry badge</PricingFeature>
                 <PricingFeature included>Priority support</PricingFeature>
                 <PricingFeature included>Export data</PricingFeature>

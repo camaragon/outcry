@@ -158,7 +158,7 @@ export default function MarketingPage() {
                 "1 feedback board",
                 "50 posts",
                 "Unlimited voters",
-                "Basic analytics",
+                "Public roadmap",
                 "Powered by Outcry badge",
               ]}
               cta="Get started"
@@ -176,7 +176,7 @@ export default function MarketingPage() {
                 "Unlimited team members",
                 "AI duplicate detection",
                 "Custom branding",
-                "Public roadmap",
+                "Remove Outcry badge",
                 "Priority support",
               ]}
               cta="Start free trial"
