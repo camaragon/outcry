@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 interface UpgradeButtonProps {
@@ -23,13 +24,19 @@ export function UpgradeButton({ workspaceId, isPro }: UpgradeButtonProps) {
 
       const data = await response.json();
 
+      if (!response.ok) {
+        toast.error(data.error || "Checkout failed");
+        return;
+      }
+
       if (data.url) {
         window.location.href = data.url;
       } else {
-        console.error("No checkout URL returned");
+        toast.error("Failed to start checkout. Please try again.");
       }
     } catch (error) {
       console.error("Checkout error:", error);
+      toast.error("Failed to start checkout. Please try again.");
     } finally {
       setIsLoading(false);
     }

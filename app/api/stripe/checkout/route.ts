@@ -1,7 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
+
+const checkoutSchema = z.object({
+  workspaceId: z.string().uuid(),
+});
 
 export async function POST(req: Request) {
   try {
@@ -10,13 +15,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { workspaceId } = await req.json();
-    if (!workspaceId) {
+    const body = await req.json();
+    const parsed = checkoutSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Workspace ID required" },
+        { error: "Invalid workspace ID" },
         { status: 400 }
       );
     }
+    const { workspaceId } = parsed.data;
 
     // Get workspace and verify user has access
     const workspace = await db.workspace.findFirst({
