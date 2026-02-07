@@ -1,12 +1,9 @@
 import Link from "next/link";
-import {
-  Sparkles,
-  MessageSquare,
-  BarChart3,
-  Zap,
-  Check,
-  ArrowRight,
-} from "lucide-react";
+import { LucideIcon, Sparkles, MessageSquare, BarChart3, Zap, Check, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { PricingCard } from "@/components/pricing-card";
 
 export default function MarketingPage() {
   return (
@@ -14,13 +11,13 @@ export default function MarketingPage() {
       {/* Hero */}
       <section className="flex flex-col items-center justify-center px-4 py-24 text-center md:py-32">
         <div className="mx-auto max-w-4xl space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full border bg-muted/50 px-4 py-1.5 text-sm">
-            <Sparkles className="size-4 text-violet-500" />
-            <span>AI-powered feedback management</span>
-          </div>
+          <Badge variant="secondary" className="gap-2">
+            <Sparkles className="size-4 text-primary" />
+            AI-powered feedback management
+          </Badge>
           <h1 className="text-5xl font-bold tracking-tight sm:text-7xl">
             Boards that{" "}
-            <span className="bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               think
             </span>
           </h1>
@@ -30,19 +27,15 @@ export default function MarketingPage() {
             per-user pricing traps.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/sign-up"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-lg font-medium text-primary-foreground hover:bg-primary/90 transition"
-            >
-              Start free trial
-              <ArrowRight className="size-5" />
-            </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-2 rounded-lg border px-8 py-4 text-lg font-medium hover:bg-accent transition"
-            >
-              See pricing
-            </Link>
+            <Button asChild size="lg" className="h-12 px-8 text-lg">
+              <Link href="/sign-up">
+                Start free trial
+                <ArrowRight className="size-5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="h-12 px-8 text-lg">
+              <Link href="/pricing">See pricing</Link>
+            </Button>
           </div>
           <p className="text-sm text-muted-foreground">
             Free tier available • No credit card required
@@ -76,32 +69,32 @@ export default function MarketingPage() {
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
-              icon={<Sparkles className="size-6" />}
+              icon={Sparkles}
               title="AI Duplicate Detection"
               description="Automatically surfaces similar feedback as users type. No more manually merging duplicates."
             />
             <FeatureCard
-              icon={<MessageSquare className="size-6" />}
+              icon={MessageSquare}
               title="Public Feedback Board"
               description="Let customers submit ideas and vote on what matters most. Upvotes, comments, and status updates."
             />
             <FeatureCard
-              icon={<BarChart3 className="size-6" />}
+              icon={BarChart3}
               title="Public Roadmap"
               description="Show customers what's planned, in progress, and shipped. Build trust with transparency."
             />
             <FeatureCard
-              icon={<Zap className="size-6" />}
+              icon={Zap}
               title="Status Management"
               description="Move feedback through your workflow: Open → Under Review → Planned → In Progress → Complete."
             />
             <FeatureCard
-              icon={<Check className="size-6" />}
+              icon={Check}
               title="Categories & Filtering"
               description="Organize feedback with custom categories. Filter and sort to find what matters."
             />
             <FeatureCard
-              icon={<ArrowRight className="size-6" />}
+              icon={ArrowRight}
               title="Simple Pricing"
               description="$49/mo flat. Unlimited users, unlimited feedback, unlimited boards. No surprises."
             />
@@ -153,17 +146,17 @@ export default function MarketingPage() {
             <PricingCard
               name="Free"
               price="$0"
+              period="/month"
               description="For trying things out"
               features={[
-                "1 feedback board",
-                "50 posts",
-                "Unlimited voters",
-                "Public roadmap",
-                "Powered by Outcry badge",
+                { text: "1 feedback board", included: true },
+                { text: "50 posts", included: true },
+                { text: "Unlimited voters", included: true },
+                { text: "Public roadmap", included: true },
+                { text: "Powered by Outcry badge", included: true },
               ]}
               cta="Get started"
               ctaHref="/sign-up"
-              highlighted={false}
             />
             <PricingCard
               name="Pro"
@@ -171,17 +164,18 @@ export default function MarketingPage() {
               period="/month"
               description="For growing products"
               features={[
-                "Unlimited boards",
-                "Unlimited posts",
-                "Unlimited team members",
-                "AI duplicate detection",
-                "Custom branding",
-                "Remove Outcry badge",
-                "Priority support",
+                { text: "Unlimited boards", included: true },
+                { text: "Unlimited posts", included: true },
+                { text: "Unlimited team members", included: true },
+                { text: "AI duplicate detection", included: true },
+                { text: "Custom branding", included: true },
+                { text: "Remove Outcry badge", included: true },
+                { text: "Priority support", included: true },
               ]}
               cta="Start free trial"
               ctaHref="/sign-up"
-              highlighted={true}
+              highlighted
+              badge="Most popular"
             />
           </div>
         </div>
@@ -198,62 +192,38 @@ export default function MarketingPage() {
             prioritize customer feedback.
           </p>
           <div className="mt-8">
-            <Link
-              href="/sign-up"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-lg font-medium text-primary-foreground hover:bg-primary/90 transition"
-            >
-              Get started for free
-              <ArrowRight className="size-5" />
-            </Link>
+            <Button asChild size="lg" className="h-12 px-8 text-lg">
+              <Link href="/sign-up">
+                Get started for free
+                <ArrowRight className="size-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t py-12">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold">Outcry</span>
-              <span className="text-muted-foreground">
-                — Boards that think
-              </span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link href="/pricing" className="hover:text-foreground transition">
-                Pricing
-              </Link>
-              <Link href="/sign-in" className="hover:text-foreground transition">
-                Sign in
-              </Link>
-            </div>
-          </div>
-          <div className="mt-8 text-center text-sm text-muted-foreground">
-            © 2026 Outcry. All rights reserved.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
 
 function FeatureCard({
-  icon,
+  icon: Icon,
   title,
   description,
 }: {
-  icon: React.ReactNode;
+  icon: LucideIcon;
   title: string;
   description: string;
 }) {
   return (
-    <div className="rounded-xl border bg-card p-6">
-      <div className="flex size-12 items-center justify-center rounded-lg bg-violet-500/10 text-violet-500">
-        {icon}
-      </div>
-      <h3 className="mt-4 text-lg font-semibold">{title}</h3>
-      <p className="mt-2 text-muted-foreground">{description}</p>
-    </div>
+    <Card>
+      <CardContent className="pt-6">
+        <div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="size-6" />
+        </div>
+        <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+        <p className="mt-2 text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -268,66 +238,11 @@ function Step({
 }) {
   return (
     <div className="text-center">
-      <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-violet-500 text-xl font-bold text-white">
+      <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
         {number}
       </div>
       <h3 className="mt-4 text-lg font-semibold">{title}</h3>
       <p className="mt-2 text-muted-foreground">{description}</p>
-    </div>
-  );
-}
-
-function PricingCard({
-  name,
-  price,
-  period,
-  description,
-  features,
-  cta,
-  ctaHref,
-  highlighted,
-}: {
-  name: string;
-  price: string;
-  period?: string;
-  description: string;
-  features: string[];
-  cta: string;
-  ctaHref: string;
-  highlighted: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-xl border p-8 ${
-        highlighted
-          ? "border-violet-500 bg-violet-500/5 ring-1 ring-violet-500"
-          : "bg-card"
-      }`}
-    >
-      <h3 className="text-lg font-semibold">{name}</h3>
-      <div className="mt-4 flex items-baseline gap-1">
-        <span className="text-4xl font-bold">{price}</span>
-        {period && <span className="text-muted-foreground">{period}</span>}
-      </div>
-      <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-      <ul className="mt-6 space-y-3">
-        {features.map((feature) => (
-          <li key={feature} className="flex items-center gap-2 text-sm">
-            <Check className="size-4 text-violet-500" />
-            {feature}
-          </li>
-        ))}
-      </ul>
-      <Link
-        href={ctaHref}
-        className={`mt-8 block w-full rounded-lg py-3 text-center font-medium transition ${
-          highlighted
-            ? "bg-violet-500 text-white hover:bg-violet-600"
-            : "border hover:bg-accent"
-        }`}
-      >
-        {cta}
-      </Link>
     </div>
   );
 }

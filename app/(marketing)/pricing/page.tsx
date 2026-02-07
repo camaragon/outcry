@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Check, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PricingCard } from "@/components/pricing-card";
 
 export default function PricingPage() {
   return (
@@ -17,73 +19,45 @@ export default function PricingPage() {
       {/* Pricing Cards */}
       <section className="px-4 pb-24">
         <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
-          {/* Free Plan */}
-          <div className="rounded-2xl border bg-card p-8">
-            <h2 className="text-xl font-semibold">Free</h2>
-            <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-5xl font-bold">$0</span>
-              <span className="text-muted-foreground">/month</span>
-            </div>
-            <p className="mt-4 text-muted-foreground">
-              Perfect for trying out Outcry and seeing if it fits your workflow.
-            </p>
-            <Link
-              href="/sign-up"
-              className="mt-8 block w-full rounded-lg border py-3 text-center font-medium hover:bg-accent transition"
-            >
-              Get started
-            </Link>
-            <div className="mt-8 space-y-4">
-              <h3 className="font-medium">What&apos;s included:</h3>
-              <ul className="space-y-3">
-                <PricingFeature included>1 feedback board</PricingFeature>
-                <PricingFeature included>Up to 50 posts</PricingFeature>
-                <PricingFeature included>Unlimited voters</PricingFeature>
-                <PricingFeature included>Public roadmap</PricingFeature>
-                <PricingFeature included>Basic status management</PricingFeature>
-                <PricingFeature included>Community support</PricingFeature>
-                <PricingFeature>AI duplicate detection</PricingFeature>
-                <PricingFeature>Custom branding</PricingFeature>
-                <PricingFeature>Priority support</PricingFeature>
-              </ul>
-            </div>
-          </div>
-
-          {/* Pro Plan */}
-          <div className="rounded-2xl border-2 border-violet-500 bg-violet-500/5 p-8 ring-1 ring-violet-500/20">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Pro</h2>
-              <span className="rounded-full bg-violet-500 px-3 py-1 text-xs font-medium text-white">
-                Most popular
-              </span>
-            </div>
-            <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-5xl font-bold">$49</span>
-              <span className="text-muted-foreground">/month</span>
-            </div>
-            <p className="mt-4 text-muted-foreground">
-              For growing products that need powerful feedback management.
-            </p>
-            <Link
-              href="/sign-up"
-              className="mt-8 block w-full rounded-lg bg-violet-500 py-3 text-center font-medium text-white hover:bg-violet-600 transition"
-            >
-              Start free trial
-            </Link>
-            <div className="mt-8 space-y-4">
-              <h3 className="font-medium">Everything in Free, plus:</h3>
-              <ul className="space-y-3">
-                <PricingFeature included>Unlimited boards</PricingFeature>
-                <PricingFeature included>Unlimited posts</PricingFeature>
-                <PricingFeature included>Unlimited team members</PricingFeature>
-                <PricingFeature included>AI duplicate detection</PricingFeature>
-                <PricingFeature included>Custom branding</PricingFeature>
-                <PricingFeature included>Remove Outcry badge</PricingFeature>
-                <PricingFeature included>Priority support</PricingFeature>
-                <PricingFeature included>Export data</PricingFeature>
-              </ul>
-            </div>
-          </div>
+          <PricingCard
+            name="Free"
+            price="$0"
+            period="/month"
+            description="Perfect for trying out Outcry and seeing if it fits your workflow."
+            features={[
+              { text: "1 feedback board", included: true },
+              { text: "Up to 50 posts", included: true },
+              { text: "Unlimited voters", included: true },
+              { text: "Public roadmap", included: true },
+              { text: "Basic status management", included: true },
+              { text: "Community support", included: true },
+              { text: "AI duplicate detection", included: false },
+              { text: "Custom branding", included: false },
+              { text: "Priority support", included: false },
+            ]}
+            cta="Get started"
+            ctaHref="/sign-up"
+          />
+          <PricingCard
+            name="Pro"
+            price="$49"
+            period="/month"
+            description="For growing products that need powerful feedback management."
+            features={[
+              { text: "Unlimited boards", included: true },
+              { text: "Unlimited posts", included: true },
+              { text: "Unlimited team members", included: true },
+              { text: "AI duplicate detection", included: true },
+              { text: "Custom branding", included: true },
+              { text: "Remove Outcry badge", included: true },
+              { text: "Priority support", included: true },
+              { text: "Export data", included: true },
+            ]}
+            cta="Start free trial"
+            ctaHref="/sign-up"
+            highlighted
+            badge="Most popular"
+          />
         </div>
       </section>
 
@@ -100,7 +74,7 @@ export default function PricingPage() {
                 <tr className="border-b">
                   <th className="py-4 text-left font-medium">Feature</th>
                   <th className="py-4 text-center font-medium">
-                    <span className="text-violet-500">Outcry Pro</span>
+                    <span className="text-primary">Outcry Pro</span>
                   </th>
                   <th className="py-4 text-center font-medium text-muted-foreground">
                     Canny
@@ -191,61 +165,14 @@ export default function PricingPage() {
           <p className="mt-4 text-lg text-muted-foreground">
             Start with Free and upgrade when you need more power.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/sign-up"
-              className="inline-flex items-center gap-2 rounded-lg bg-violet-500 px-8 py-3 font-medium text-white hover:bg-violet-600 transition"
-            >
-              Get started for free
-            </Link>
+          <div className="mt-8">
+            <Button asChild size="lg">
+              <Link href="/sign-up">Get started for free</Link>
+            </Button>
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t py-12">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold">Outcry</span>
-              <span className="text-muted-foreground">
-                — Boards that think
-              </span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-foreground transition">
-                Home
-              </Link>
-              <Link href="/sign-in" className="hover:text-foreground transition">
-                Sign in
-              </Link>
-            </div>
-          </div>
-          <div className="mt-8 text-center text-sm text-muted-foreground">
-            © 2026 Outcry. All rights reserved.
-          </div>
-        </div>
-      </footer>
     </div>
-  );
-}
-
-function PricingFeature({
-  children,
-  included = false,
-}: {
-  children: React.ReactNode;
-  included?: boolean;
-}) {
-  return (
-    <li className="flex items-center gap-3">
-      {included ? (
-        <Check className="size-5 text-violet-500" />
-      ) : (
-        <X className="size-5 text-muted-foreground/50" />
-      )}
-      <span className={included ? "" : "text-muted-foreground"}>{children}</span>
-    </li>
   );
 }
 
@@ -274,7 +201,7 @@ function ComparisonRow({
   return (
     <tr>
       <td className="py-4 font-medium">{feature}</td>
-      <td className="py-4 text-center text-violet-500">{renderCell(outcry)}</td>
+      <td className="py-4 text-center text-primary">{renderCell(outcry)}</td>
       <td className="py-4 text-center text-muted-foreground">
         {renderCell(canny)}
       </td>
