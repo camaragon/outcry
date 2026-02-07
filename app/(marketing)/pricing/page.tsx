@@ -3,7 +3,52 @@ import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PricingCard } from "@/components/pricing-card";
 
-export default function PricingPage() {
+const ComparisonRow = ({
+  feature,
+  outcry,
+  canny,
+  featurebase,
+}: {
+  feature: string;
+  outcry: string | boolean;
+  canny: string | boolean;
+  featurebase: string | boolean;
+}) => {
+  const renderCell = (value: string | boolean) => {
+    if (typeof value === "boolean") {
+      return value ? (
+        <Check className="mx-auto size-5 text-green-500" />
+      ) : (
+        <X className="mx-auto size-5 text-muted-foreground/50" />
+      );
+    }
+    return value;
+  };
+
+  return (
+    <tr>
+      <td className="py-4 font-medium">{feature}</td>
+      <td className="py-4 text-center text-primary">{renderCell(outcry)}</td>
+      <td className="py-4 text-center text-muted-foreground">
+        {renderCell(canny)}
+      </td>
+      <td className="py-4 text-center text-muted-foreground">
+        {renderCell(featurebase)}
+      </td>
+    </tr>
+  );
+};
+
+const FAQ = ({ question, answer }: { question: string; answer: string }) => {
+  return (
+    <div>
+      <h3 className="font-medium">{question}</h3>
+      <p className="mt-2 text-muted-foreground">{answer}</p>
+    </div>
+  );
+};
+
+const PricingPage = () => {
   return (
     <div className="flex flex-col">
       {/* Header */}
@@ -174,49 +219,6 @@ export default function PricingPage() {
       </section>
     </div>
   );
-}
+};
 
-function ComparisonRow({
-  feature,
-  outcry,
-  canny,
-  featurebase,
-}: {
-  feature: string;
-  outcry: string | boolean;
-  canny: string | boolean;
-  featurebase: string | boolean;
-}) {
-  const renderCell = (value: string | boolean) => {
-    if (typeof value === "boolean") {
-      return value ? (
-        <Check className="mx-auto size-5 text-green-500" />
-      ) : (
-        <X className="mx-auto size-5 text-muted-foreground/50" />
-      );
-    }
-    return value;
-  };
-
-  return (
-    <tr>
-      <td className="py-4 font-medium">{feature}</td>
-      <td className="py-4 text-center text-primary">{renderCell(outcry)}</td>
-      <td className="py-4 text-center text-muted-foreground">
-        {renderCell(canny)}
-      </td>
-      <td className="py-4 text-center text-muted-foreground">
-        {renderCell(featurebase)}
-      </td>
-    </tr>
-  );
-}
-
-function FAQ({ question, answer }: { question: string; answer: string }) {
-  return (
-    <div>
-      <h3 className="font-medium">{question}</h3>
-      <p className="mt-2 text-muted-foreground">{answer}</p>
-    </div>
-  );
-}
+export default PricingPage;

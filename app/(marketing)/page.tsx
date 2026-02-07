@@ -6,7 +6,49 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PricingCard } from "@/components/pricing-card";
 
-export default function MarketingPage() {
+const FeatureCard = ({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}) => {
+  return (
+    <Card>
+      <CardContent className="pt-6">
+        <div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="size-6" />
+        </div>
+        <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+        <p className="mt-2 text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
+  );
+};
+
+const Step = ({
+  number,
+  title,
+  description,
+}: {
+  number: string;
+  title: string;
+  description: string;
+}) => {
+  return (
+    <div className="text-center">
+      <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
+        {number}
+      </div>
+      <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+      <p className="mt-2 text-muted-foreground">{description}</p>
+    </div>
+  );
+};
+
+const MarketingPage = () => {
   return (
     <div className="flex flex-col">
       {/* Hero */}
@@ -204,46 +246,6 @@ export default function MarketingPage() {
       </section>
     </div>
   );
-}
+};
 
-function FeatureCard({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Icon className="size-6" />
-        </div>
-        <h3 className="mt-4 text-lg font-semibold">{title}</h3>
-        <p className="mt-2 text-muted-foreground">{description}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function Step({
-  number,
-  title,
-  description,
-}: {
-  number: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="text-center">
-      <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
-        {number}
-      </div>
-      <h3 className="mt-4 text-lg font-semibold">{title}</h3>
-      <p className="mt-2 text-muted-foreground">{description}</p>
-    </div>
-  );
-}
+export default MarketingPage;
