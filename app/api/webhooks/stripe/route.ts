@@ -93,28 +93,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Fetch subscription to get price and period end
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  console.log("[STRIPE_WEBHOOK] Retrieved subscription", {
-    id: subscription.id,
-    status: subscription.status,
-    priceId: subscription.items.data[0]?.price.id,
-    current_period_end: subscription.current_period_end,
-    current_period_end_type: typeof subscription.current_period_end,
-  });
-  // DEBUG: Log full subscription object to find current_period_end location
-  console.log("[STRIPE_WEBHOOK] Full subscription keys:", Object.keys(subscription));
-  console.log("[STRIPE_WEBHOOK] Full subscription JSON:", JSON.stringify(subscription, null, 2));
 
-  // Safely handle current_period_end - Stripe returns Unix timestamp in seconds
-  const periodEnd = subscription.current_period_end;
+  // In API version 2026-01-28.clover, current_period_end moved to subscription item level
+  const subscriptionItem = subscription.items.data[0];
+  const periodEnd = subscriptionItem?.current_period_end ?? subscription.current_period_end;
   const periodEndDate = periodEnd && typeof periodEnd === 'number' 
     ? new Date(periodEnd * 1000) 
     : null;
   
-  console.log("[STRIPE_WEBHOOK] Period end calculation", {
-    raw: periodEnd,
-    calculated: periodEndDate,
-  });
-
   await db.workspace.update({
     where: { id: workspaceId },
     data: {
@@ -152,15 +138,20 @@ async function updateWorkspaceSubscription(
   subscription: Stripe.Subscription
 ) {
   const isActive = ["active", "trialing"].includes(subscription.status);
+  
+  // In API version 2026-01-28.clover, current_period_end moved to subscription item level
+  const subscriptionItem = subscription.items.data[0];
+  const periodEnd = subscriptionItem?.current_period_end ?? subscription.current_period_end;
+  const periodEndDate = periodEnd && typeof periodEnd === 'number' 
+    ? new Date(periodEnd * 1000) 
+    : null;
 
   await db.workspace.update({
     where: { id: workspaceId },
     data: {
       plan: isActive ? "PRO" : "FREE",
-      stripePriceId: subscription.items.data[0]?.price.id,
-      stripeCurrentPeriodEnd: new Date(
-        subscription.current_period_end * 1000
-      ),
+      stripePriceId: subscriptionItem?.price.id,
+      stripeCurrentPeriodEnd: periodEndDate,
     },
   });
 
