@@ -100,6 +100,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     current_period_end: subscription.current_period_end,
     current_period_end_type: typeof subscription.current_period_end,
   });
+  // DEBUG: Log full subscription object to find current_period_end location
+  console.log("[STRIPE_WEBHOOK] Full subscription keys:", Object.keys(subscription));
+  console.log("[STRIPE_WEBHOOK] Full subscription JSON:", JSON.stringify(subscription, null, 2));
 
   // Safely handle current_period_end - Stripe returns Unix timestamp in seconds
   const periodEnd = subscription.current_period_end;
