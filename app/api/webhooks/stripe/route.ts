@@ -97,6 +97,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     id: subscription.id,
     status: subscription.status,
     priceId: subscription.items.data[0]?.price.id,
+    current_period_end: subscription.current_period_end,
+    current_period_end_type: typeof subscription.current_period_end,
+  });
+
+  // Safely handle current_period_end - Stripe returns Unix timestamp in seconds
+  const periodEnd = subscription.current_period_end;
+  const periodEndDate = periodEnd && typeof periodEnd === 'number' 
+    ? new Date(periodEnd * 1000) 
+    : null;
+  
+  console.log("[STRIPE_WEBHOOK] Period end calculation", {
+    raw: periodEnd,
+    calculated: periodEndDate,
   });
 
   await db.workspace.update({
@@ -106,9 +119,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscriptionId,
       stripePriceId: subscription.items.data[0]?.price.id,
-      stripeCurrentPeriodEnd: new Date(
-        subscription.current_period_end * 1000
-      ),
+      stripeCurrentPeriodEnd: periodEndDate,
     },
   });
 
