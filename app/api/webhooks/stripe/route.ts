@@ -94,9 +94,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // Fetch subscription to get price and period end
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
-  // In API version 2026-01-28.clover, current_period_end moved to subscription item level
+  // Prefer item-level current_period_end when present; fall back to subscription-level otherwise
   const subscriptionItem = subscription.items.data[0];
-  const periodEnd = subscriptionItem?.current_period_end ?? subscription.current_period_end;
+  const periodEnd = (subscriptionItem as any)?.current_period_end ?? subscription.current_period_end;
   const periodEndDate = periodEnd && typeof periodEnd === 'number' 
     ? new Date(periodEnd * 1000) 
     : null;
@@ -139,9 +139,9 @@ async function updateWorkspaceSubscription(
 ) {
   const isActive = ["active", "trialing"].includes(subscription.status);
   
-  // In API version 2026-01-28.clover, current_period_end moved to subscription item level
+  // Prefer item-level current_period_end when present; fall back to subscription-level otherwise
   const subscriptionItem = subscription.items.data[0];
-  const periodEnd = subscriptionItem?.current_period_end ?? subscription.current_period_end;
+  const periodEnd = (subscriptionItem as any)?.current_period_end ?? subscription.current_period_end;
   const periodEndDate = periodEnd && typeof periodEnd === 'number' 
     ? new Date(periodEnd * 1000) 
     : null;

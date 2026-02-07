@@ -44,6 +44,7 @@ export function UpgradeButton({ workspaceId, isPro }: UpgradeButtonProps) {
 
   return (
     <Button
+      type="button"
       onClick={handleClick}
       disabled={isLoading}
       variant={isPro ? "outline" : "default"}
