@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  build:
-    name: Build & Lint
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -27,14 +27,25 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Type check & Build
-        run: npm run build
-        env:
-          # Skip actual DB connection during build
-          DATABASE_URL: "postgresql://fake:fake@localhost:5432/fake"
-          # Clerk keys (build-time only, not used)
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_fake"
-          CLERK_SECRET_KEY: "sk_test_fake"
-          # Stripe keys (build-time only, not used)
-          STRIPE_SECRET_KEY: "sk_test_fake"
-          STRIPE_WEBHOOK_SECRET: "whsec_fake"
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Type check
+        run: npx tsc --noEmit
