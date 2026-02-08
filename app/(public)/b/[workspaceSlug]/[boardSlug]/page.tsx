@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { Megaphone, Settings } from "lucide-react";
+import { Megaphone, Settings, Map } from "lucide-react";
 import { db } from "@/lib/db";
 import { getAuthorizedUser } from "@/lib/get-authorized-user";
 import { POST_STATUSES } from "@/lib/post-statuses";
@@ -108,6 +108,12 @@ export default async function PublicBoardPage({
           <h1 className="text-2xl font-bold">{board.name}</h1>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/b/${workspaceSlug}/roadmap?from=${boardSlug}`}>
+              <Map className="size-4" />
+              Roadmap
+            </Link>
+          </Button>
           {isAdmin && (
             <Button variant="outline" size="sm" asChild>
               <Link href={`/dashboard/board/${board.id}`}>
