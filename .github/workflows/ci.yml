@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  lint:
-    name: Lint
+  build:
+    name: Build & Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -27,25 +27,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
-  typecheck:
-    name: Type Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Generate Prisma Client
-        run: npx prisma generate
-
-      - name: Type check
-        run: npx tsc --noEmit
+      - name: Type check & Build
+        run: npm run build
+        env:
+          DATABASE_URL: "postgresql://fake:fake@localhost:5432/fake"
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: "whsec_fake"
