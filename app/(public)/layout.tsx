@@ -1,6 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 
-// Public pages use Clerk for auth checks — skip static generation for CI builds
+// Public pages depend on Clerk for auth state — force dynamic rendering
 export const dynamic = "force-dynamic";
 
 export default function PublicLayout({
@@ -12,7 +12,7 @@ export default function PublicLayout({
     <ClerkProvider>
       <div className="flex min-h-screen flex-col">
         <div className="flex-1">{children}</div>
-        
+
         {/* Shared footer for all public pages
             TODO: Move to workspace-scoped layout and gate by plan (hide for Pro) */}
         <footer className="border-t py-6">

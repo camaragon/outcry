@@ -1,6 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 
-// All platform routes require auth — skip static generation for CI builds
+// Platform routes depend on Clerk — force dynamic rendering
 export const dynamic = "force-dynamic";
 
 export default function PlatformLayout({
