@@ -97,6 +97,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // In Stripe SDK v20+, current_period_end is on the subscription item, not the subscription
   const subscriptionItem = subscription.items.data[0];
+  if (!subscriptionItem) {
+    console.warn(`[STRIPE_WEBHOOK] No subscription item found for subscription ${subscriptionId}`);
+  }
   const periodEndDate = subscriptionItem
     ? new Date(subscriptionItem.current_period_end * 1000)
     : null;
@@ -141,6 +144,9 @@ async function updateWorkspaceSubscription(
   
   // In Stripe SDK v20+, current_period_end is on the subscription item, not the subscription
   const subscriptionItem = subscription.items.data[0];
+  if (!subscriptionItem) {
+    console.warn(`[STRIPE_WEBHOOK] No subscription item found for subscription ${subscription.id}`);
+  }
   const periodEndDate = subscriptionItem
     ? new Date(subscriptionItem.current_period_end * 1000)
     : null;
