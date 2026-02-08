@@ -1,30 +1,19 @@
 import { RoadmapCard } from "./roadmap-card";
-
-interface Post {
-  id: string;
-  title: string;
-  body: string;
-  voteCount: number;
-  status: string;
-  updatedAt: Date;
-  category: { name: string; color: string } | null;
-  board: { slug: string };
-  _count: { comments: number };
-}
+import type { RoadmapPost } from "./roadmap-board";
 
 interface RoadmapColumnProps {
   title: string;
   description: string;
-  posts: Post[];
+  posts: RoadmapPost[];
   workspaceSlug: string;
 }
 
-export const RoadmapColumn = ({
+export function RoadmapColumn({
   title,
   description,
   posts,
   workspaceSlug,
-}: RoadmapColumnProps) => {
+}: RoadmapColumnProps) {
   return (
     <div className="flex flex-col">
       {/* Column header */}
@@ -56,4 +45,4 @@ export const RoadmapColumn = ({
       </div>
     </div>
   );
-};
+}

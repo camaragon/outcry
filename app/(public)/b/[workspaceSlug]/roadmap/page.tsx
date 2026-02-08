@@ -1,6 +1,7 @@
-import { Suspense } from "react";
+import { Suspense, cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Megaphone, ArrowLeft } from "lucide-react";
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -12,14 +13,14 @@ interface PublicRoadmapPageProps {
   params: Promise<{
     workspaceSlug: string;
   }>;
+  searchParams: Promise<{
+    from?: string;
+  }>;
 }
 
-export default async function PublicRoadmapPage({
-  params,
-}: PublicRoadmapPageProps) {
-  const { workspaceSlug } = await params;
-
-  const workspace = await db.workspace.findUnique({
+// Cached workspace fetch to dedupe between generateMetadata and page
+const getWorkspace = cache(async (workspaceSlug: string) => {
+  return db.workspace.findUnique({
     where: { slug: workspaceSlug },
     select: {
       id: true,
@@ -28,17 +29,44 @@ export default async function PublicRoadmapPage({
       boards: {
         where: { isPublic: true },
         select: { slug: true },
-        take: 1,
+        take: 10, // Get a few boards to check against `from` param
       },
     },
   });
+});
+
+export async function generateMetadata({
+  params,
+}: PublicRoadmapPageProps): Promise<Metadata> {
+  const { workspaceSlug } = await params;
+  const workspace = await getWorkspace(workspaceSlug);
+
+  return {
+    title: `Roadmap — ${workspace?.name ?? workspaceSlug}`,
+  };
+}
+
+export default async function PublicRoadmapPage({
+  params,
+  searchParams,
+}: PublicRoadmapPageProps) {
+  const [{ workspaceSlug }, resolvedSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+
+  const workspace = await getWorkspace(workspaceSlug);
 
   if (!workspace) {
     notFound();
   }
 
-  // Get the first public board slug for the "back to board" link
-  const boardSlug = workspace.boards[0]?.slug;
+  // Use `from` param if it matches a valid public board, otherwise fall back to first board
+  const fromSlug = resolvedSearchParams.from;
+  const validBoardSlugs = workspace.boards.map((b) => b.slug);
+  const boardSlug = fromSlug && validBoardSlugs.includes(fromSlug)
+    ? fromSlug
+    : validBoardSlugs[0];
 
   return (
     <div className="min-h-screen">
@@ -83,21 +111,6 @@ export default async function PublicRoadmapPage({
           <RoadmapBoard workspaceId={workspace.id} workspaceSlug={workspaceSlug} />
         </Suspense>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t py-6">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          Powered by{" "}
-          <a
-            href="https://outcry.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium hover:underline"
-          >
-            Outcry
-          </a>
-        </div>
-      </footer>
     </div>
   );
 }

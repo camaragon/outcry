@@ -2,21 +2,14 @@ import Link from "next/link";
 import { ChevronUp, MessageCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import type { RoadmapPost } from "./roadmap-board";
 
 interface RoadmapCardProps {
-  post: {
-    id: string;
-    title: string;
-    body: string;
-    voteCount: number;
-    category: { name: string; color: string } | null;
-    board: { slug: string };
-    _count: { comments: number };
-  };
+  post: RoadmapPost;
   workspaceSlug: string;
 }
 
-export const RoadmapCard = ({ post, workspaceSlug }: RoadmapCardProps) => {
+export function RoadmapCard({ post, workspaceSlug }: RoadmapCardProps) {
   return (
     <Link href={`/b/${workspaceSlug}/${post.board.slug}/${post.id}`}>
       <Card className="transition hover:border-foreground/20 hover:shadow-sm">
@@ -50,4 +43,4 @@ export const RoadmapCard = ({ post, workspaceSlug }: RoadmapCardProps) => {
       </Card>
     </Link>
   );
-};
+}

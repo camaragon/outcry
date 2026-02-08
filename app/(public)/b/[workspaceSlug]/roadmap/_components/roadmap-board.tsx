@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { RoadmapColumn } from "./roadmap-column";
 
@@ -8,15 +9,43 @@ const ROADMAP_COLUMNS = [
   { status: "COMPLETE" as const, title: "Complete", description: "Shipped!" },
 ];
 
+// Prisma select shape for roadmap posts
+const roadmapPostSelect = {
+  id: true,
+  title: true,
+  voteCount: true,
+  status: true,
+  updatedAt: true,
+  category: {
+    select: {
+      name: true,
+      color: true,
+    },
+  },
+  board: {
+    select: {
+      slug: true,
+    },
+  },
+  _count: {
+    select: {
+      comments: true,
+    },
+  },
+} satisfies Prisma.PostSelect;
+
+// Infer the post type from Prisma's return type
+export type RoadmapPost = Prisma.PostGetPayload<{ select: typeof roadmapPostSelect }>;
+
 interface RoadmapBoardProps {
   workspaceId: string;
   workspaceSlug: string;
 }
 
-export const RoadmapBoard = async ({
+export async function RoadmapBoard({
   workspaceId,
   workspaceSlug,
-}: RoadmapBoardProps) => {
+}: RoadmapBoardProps) {
   // Fetch posts for all roadmap statuses in parallel
   const postsPromises = ROADMAP_COLUMNS.map((column) =>
     db.post.findMany({
@@ -27,30 +56,7 @@ export const RoadmapBoard = async ({
         },
         status: column.status,
       },
-      select: {
-        id: true,
-        title: true,
-        body: true,
-        voteCount: true,
-        status: true,
-        updatedAt: true,
-        category: {
-          select: {
-            name: true,
-            color: true,
-          },
-        },
-        board: {
-          select: {
-            slug: true,
-          },
-        },
-        _count: {
-          select: {
-            comments: true,
-          },
-        },
-      },
+      select: roadmapPostSelect,
       orderBy: [
         { voteCount: "desc" },
         { updatedAt: "desc" },
@@ -94,4 +100,4 @@ export const RoadmapBoard = async ({
       ))}
     </div>
   );
-};
+}
