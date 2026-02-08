@@ -1,9 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-
-// Auth-protected page — skip static generation
-export const dynamic = "force-dynamic";
 import { Tags, Crown } from "lucide-react";
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
