@@ -1,6 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+
+// Auth-protected page — skip static generation
+export const dynamic = "force-dynamic";
 import { OnboardingForm } from "./_components/onboarding-form";
 
 export default async function OnboardingPage() {
