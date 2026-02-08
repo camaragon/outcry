@@ -92,14 +92,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   // Fetch subscription to get price and period end
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const subscription: Stripe.Subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
-  // Prefer item-level current_period_end when present; fall back to subscription-level otherwise
+  // In Stripe SDK v20+, current_period_end is on the subscription item, not the subscription
   const subscriptionItem = subscription.items.data[0];
-  const periodEnd = (subscriptionItem as any)?.current_period_end ?? subscription.current_period_end;
-  const periodEndDate = periodEnd && typeof periodEnd === 'number' 
-    ? new Date(periodEnd * 1000) 
-    : null;
+  if (!subscriptionItem) {
+    // Throw to trigger Stripe retry — don't upgrade with missing billing data
+    throw new Error(`No subscription item found for subscription ${subscriptionId}`);
+  }
+  const periodEndDate = new Date(subscriptionItem.current_period_end * 1000);
   
   await db.workspace.update({
     where: { id: workspaceId },
@@ -107,7 +108,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       plan: "PRO",
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscriptionId,
-      stripePriceId: subscription.items.data[0]?.price.id,
+      stripePriceId: subscriptionItem.price.id,
       stripeCurrentPeriodEnd: periodEndDate,
     },
   });
@@ -139,18 +140,19 @@ async function updateWorkspaceSubscription(
 ) {
   const isActive = ["active", "trialing"].includes(subscription.status);
   
-  // Prefer item-level current_period_end when present; fall back to subscription-level otherwise
+  // In Stripe SDK v20+, current_period_end is on the subscription item, not the subscription
   const subscriptionItem = subscription.items.data[0];
-  const periodEnd = (subscriptionItem as any)?.current_period_end ?? subscription.current_period_end;
-  const periodEndDate = periodEnd && typeof periodEnd === 'number' 
-    ? new Date(periodEnd * 1000) 
-    : null;
+  if (!subscriptionItem) {
+    // Throw to trigger Stripe retry — don't update with missing billing data
+    throw new Error(`No subscription item found for subscription ${subscription.id}`);
+  }
+  const periodEndDate = new Date(subscriptionItem.current_period_end * 1000);
 
   await db.workspace.update({
     where: { id: workspaceId },
     data: {
       plan: isActive ? "PRO" : "FREE",
-      stripePriceId: subscriptionItem?.price.id,
+      stripePriceId: subscriptionItem.price.id,
       stripeCurrentPeriodEnd: periodEndDate,
     },
   });
@@ -184,8 +186,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const subscriptionId = invoice.subscription as string;
-  if (!subscriptionId) return;
+  // In Stripe SDK v20+, subscription is nested under parent.subscription_details
+  const subscriptionDetails = invoice.parent?.subscription_details;
+  const subscriptionId = typeof subscriptionDetails?.subscription === "string"
+    ? subscriptionDetails.subscription
+    : subscriptionDetails?.subscription?.id;
+  if (!subscriptionId) {
+    console.warn(`[STRIPE_WEBHOOK] No subscription ID found for invoice ${invoice.id}`);
+    return;
+  }
 
   const workspace = await db.workspace.findFirst({
     where: { stripeSubscriptionId: subscriptionId },
