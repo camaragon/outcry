@@ -61,7 +61,7 @@ export async function RoadmapBoard({
         { voteCount: "desc" },
         { updatedAt: "desc" },
       ],
-      // Limit complete posts to most recent 20 to avoid infinite growth
+      // Limit complete posts to top 20 by votes to avoid infinite growth
       ...(column.status === "COMPLETE" ? { take: 20 } : {}),
     })
   );

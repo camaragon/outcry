@@ -29,7 +29,6 @@ const getWorkspace = cache(async (workspaceSlug: string) => {
       boards: {
         where: { isPublic: true },
         select: { slug: true },
-        take: 10, // Get a few boards to check against `from` param
       },
     },
   });
@@ -69,7 +68,7 @@ export default async function PublicRoadmapPage({
     : validBoardSlugs[0];
 
   return (
-    <div className="min-h-screen">
+    <div>
       {/* Header */}
       <header className="border-b">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
