@@ -35,3 +35,6 @@ jobs:
           # Clerk keys (build-time only, not used)
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_fake"
           CLERK_SECRET_KEY: "sk_test_fake"
+          # Stripe keys (build-time only, not used)
+          STRIPE_SECRET_KEY: "sk_test_fake"
+          STRIPE_WEBHOOK_SECRET: "whsec_fake"
