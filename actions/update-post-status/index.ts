@@ -4,6 +4,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
+import { notifyStatusChange } from "@/lib/notifications";
 import { UpdatePostStatus } from "./schema";
 import { InputType, ReturnType } from "./types";
 
@@ -17,6 +18,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       where: { id: postId },
       select: {
         id: true,
+        status: true, // Get current status for notification
         board: {
           select: {
             id: true,
@@ -51,6 +53,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "You do not have permission to update post status." };
   }
 
+  const oldStatus = post.status;
   let updatedPost;
 
   try {
@@ -61,6 +64,13 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   } catch {
     return { error: "Failed to update post status. Please try again." };
   }
+
+  // Notify the post author (fire-and-forget, don't block response)
+  notifyStatusChange({
+    postId,
+    oldStatus,
+    newStatus: status,
+  }).catch((err) => console.error("[UPDATE_POST_STATUS] Notification failed:", err));
 
   revalidatePath(`/dashboard/board/${post.board.id}`);
   revalidatePath(`/b/${post.board.workspace.slug}/${post.board.slug}`);

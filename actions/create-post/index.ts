@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { findOrCreateUser } from "@/lib/find-or-create-user";
 import { generateEmbedding } from "@/lib/embeddings";
+import { notifyNewFeedback } from "@/lib/notifications";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { CreatePost } from "./schema";
 import { InputType, ReturnType } from "./types";
@@ -50,8 +51,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "Failed to create post. Please try again." };
   }
 
-  // Generate embedding after response is sent (survives serverless shutdown)
+  // Background tasks after response is sent (survives serverless shutdown)
   after(async () => {
+    // Generate embedding for AI similarity
     try {
       const embedding = await generateEmbedding(`${title} ${body}`);
       if (!embedding) return;
@@ -61,6 +63,13 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       `;
     } catch (err) {
       console.error("[embedding] Failed to generate embedding:", err);
+    }
+
+    // Notify workspace admins of new feedback
+    try {
+      await notifyNewFeedback({ postId: post.id });
+    } catch (err) {
+      console.error("[notifications] Failed to notify admins:", err);
     }
   });
 
