@@ -92,13 +92,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   // Fetch subscription to get price and period end
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  // Explicitly type to extract Subscription from Response<Subscription>
+  const subscription: Stripe.Subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
-  // Prefer item-level current_period_end when present; fall back to subscription-level otherwise
+  // In Stripe SDK v20+, current_period_end is on the subscription item, not the subscription
   const subscriptionItem = subscription.items.data[0];
-  const periodEnd = (subscriptionItem as any)?.current_period_end ?? subscription.current_period_end;
-  const periodEndDate = periodEnd && typeof periodEnd === 'number' 
-    ? new Date(periodEnd * 1000) 
+  const periodEndDate = subscriptionItem
+    ? new Date(subscriptionItem.current_period_end * 1000)
     : null;
   
   await db.workspace.update({
@@ -107,7 +107,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       plan: "PRO",
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscriptionId,
-      stripePriceId: subscription.items.data[0]?.price.id,
+      stripePriceId: subscriptionItem?.price.id,
       stripeCurrentPeriodEnd: periodEndDate,
     },
   });
@@ -139,11 +139,10 @@ async function updateWorkspaceSubscription(
 ) {
   const isActive = ["active", "trialing"].includes(subscription.status);
   
-  // Prefer item-level current_period_end when present; fall back to subscription-level otherwise
+  // In Stripe SDK v20+, current_period_end is on the subscription item, not the subscription
   const subscriptionItem = subscription.items.data[0];
-  const periodEnd = (subscriptionItem as any)?.current_period_end ?? subscription.current_period_end;
-  const periodEndDate = periodEnd && typeof periodEnd === 'number' 
-    ? new Date(periodEnd * 1000) 
+  const periodEndDate = subscriptionItem
+    ? new Date(subscriptionItem.current_period_end * 1000)
     : null;
 
   await db.workspace.update({
@@ -184,7 +183,11 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const subscriptionId = invoice.subscription as string;
+  // In Stripe SDK v20+, subscription is nested under parent.subscription_details
+  const subscriptionDetails = invoice.parent?.subscription_details;
+  const subscriptionId = typeof subscriptionDetails?.subscription === 'string'
+    ? subscriptionDetails.subscription
+    : subscriptionDetails?.subscription?.id;
   if (!subscriptionId) return;
 
   const workspace = await db.workspace.findFirst({
