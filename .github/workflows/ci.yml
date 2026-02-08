@@ -6,10 +6,22 @@ on:
   push:
     branches: [main]
 
+# Least-privilege permissions
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build & Lint
     runs-on: ubuntu-latest
+
+    # All fake values — no real secrets needed
+    env:
+      DATABASE_URL: "postgresql://fake:fake@localhost:5432/fake"
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_fake"
+      CLERK_SECRET_KEY: "sk_test_fake"
+      STRIPE_SECRET_KEY: "sk_test_fake"
+      STRIPE_WEBHOOK_SECRET: "whsec_fake"
 
     steps:
       - name: Checkout
@@ -29,10 +41,3 @@ jobs:
 
       - name: Type check & Build
         run: npm run build
-        env:
-          # All fake values — no real secrets needed
-          DATABASE_URL: "postgresql://fake:fake@localhost:5432/fake"
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_fake"
-          CLERK_SECRET_KEY: "sk_test_fake"
-          STRIPE_SECRET_KEY: "sk_test_fake"
-          STRIPE_WEBHOOK_SECRET: "whsec_fake"
