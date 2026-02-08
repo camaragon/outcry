@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { redirect, notFound } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
+
+// Auth-protected page — skip static generation
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { db } from "@/lib/db";
