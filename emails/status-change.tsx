@@ -9,6 +9,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { formatStatus } from "@/lib/status-labels";
 
 interface StatusChangeEmailProps {
   userName: string;
@@ -19,16 +20,6 @@ interface StatusChangeEmailProps {
   workspaceName: string;
 }
 
-// Human-readable status labels
-const STATUS_LABELS: Record<string, string> = {
-  OPEN: "Open",
-  UNDER_REVIEW: "Under Review",
-  PLANNED: "Planned",
-  IN_PROGRESS: "In Progress",
-  COMPLETE: "Complete",
-  CLOSED: "Closed",
-};
-
 export default function StatusChangeEmail({
   userName,
   postTitle,
@@ -37,8 +28,8 @@ export default function StatusChangeEmail({
   postUrl,
   workspaceName,
 }: StatusChangeEmailProps) {
-  const oldLabel = STATUS_LABELS[oldStatus] || oldStatus;
-  const newLabel = STATUS_LABELS[newStatus] || newStatus;
+  const oldLabel = formatStatus(oldStatus);
+  const newLabel = formatStatus(newStatus);
 
   return (
     <Html>

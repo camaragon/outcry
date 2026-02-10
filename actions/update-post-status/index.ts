@@ -1,6 +1,7 @@
 "use server";
 
 import { currentUser } from "@clerk/nextjs/server";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
@@ -65,12 +66,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "Failed to update post status. Please try again." };
   }
 
-  // Notify the post author (fire-and-forget, don't block response)
-  notifyStatusChange({
-    postId,
-    oldStatus,
-    newStatus: status,
-  }).catch((err) => console.error("[UPDATE_POST_STATUS] Notification failed:", err));
+  // Notify the post author after response is sent (survives serverless shutdown)
+  after(async () => {
+    try {
+      await notifyStatusChange({ postId, oldStatus, newStatus: status });
+    } catch (err) {
+      console.error("[UPDATE_POST_STATUS] Notification failed:", err);
+    }
+  });
 
   revalidatePath(`/dashboard/board/${post.board.id}`);
   revalidatePath(`/b/${post.board.workspace.slug}/${post.board.slug}`);

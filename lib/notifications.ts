@@ -1,4 +1,5 @@
 import { resend, FROM_EMAIL } from "./resend";
+import { formatStatus } from "./status-labels";
 import StatusChangeEmail from "@/emails/status-change";
 import NewFeedbackEmail from "@/emails/new-feedback";
 import { db } from "./db";
@@ -19,8 +20,9 @@ export async function notifyStatusChange({
   oldStatus,
   newStatus,
 }: NotifyStatusChangeParams) {
-  // Skip if status didn't actually change
+  // Skip if status didn't actually change or Resend is not configured
   if (oldStatus === newStatus) return;
+  if (!resend) return;
 
   try {
     const post = await db.post.findUnique({
@@ -53,7 +55,9 @@ export async function notifyStatusChange({
       }),
     });
 
-    console.log(`[NOTIFICATIONS] Sent status change email to ${post.author.email}`);
+    console.log(
+      `[NOTIFICATIONS] Sent status change email for post ${post.id} (authorId: ${post.author.id})`
+    );
   } catch (error) {
     console.error("[NOTIFICATIONS] Failed to send status change email:", error);
   }
@@ -67,6 +71,8 @@ interface NotifyNewFeedbackParams {
  * Notify workspace admins when new feedback is submitted
  */
 export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
+  if (!resend) return;
+
   try {
     const post = await db.post.findUnique({
       where: { id: postId },
@@ -101,7 +107,7 @@ export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
     // Send to all admins
     await Promise.all(
       admins.map((admin) =>
-        resend.emails.send({
+        resend!.emails.send({
           from: FROM_EMAIL,
           to: admin.email,
           subject: `New feedback: ${post.title}`,
@@ -119,21 +125,10 @@ export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
       )
     );
 
-    console.log(`[NOTIFICATIONS] Sent new feedback email to ${admins.length} admins`);
+    console.log(
+      `[NOTIFICATIONS] Sent new feedback email to ${admins.length} admin(s) for post ${post.id}`
+    );
   } catch (error) {
     console.error("[NOTIFICATIONS] Failed to send new feedback email:", error);
   }
-}
-
-// Helper to format status for display
-function formatStatus(status: string): string {
-  const labels: Record<string, string> = {
-    OPEN: "Open",
-    UNDER_REVIEW: "Under Review",
-    PLANNED: "Planned",
-    IN_PROGRESS: "In Progress",
-    COMPLETE: "Complete",
-    CLOSED: "Closed",
-  };
-  return labels[status] || status;
 }
