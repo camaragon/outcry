@@ -70,6 +70,7 @@ interface NotifyNewFeedbackParams {
  */
 export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
   if (!resend) return;
+  const client = resend;
 
   try {
     const post = await db.post.findUnique({
@@ -122,7 +123,7 @@ export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
     // Send to all admins
     await Promise.all(
       admins.map((admin) =>
-        resend!.emails.send({
+        client.emails.send({
           from: FROM_EMAIL,
           to: admin.email,
           subject: `New feedback: ${post.title}`,
