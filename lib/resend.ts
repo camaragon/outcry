@@ -8,6 +8,6 @@ export const resend: Resend | null = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-// Use verified outcry.app domain; fall back to Resend sandbox if needed
+// Default sender — override via RESEND_FROM_EMAIL env var
 export const FROM_EMAIL =
   process.env.RESEND_FROM_EMAIL || "Outcry <notifications@outcry.app>";

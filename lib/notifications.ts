@@ -27,11 +27,25 @@ export async function notifyStatusChange({
   try {
     const post = await db.post.findUnique({
       where: { id: postId },
-      include: {
-        author: true,
+      select: {
+        id: true,
+        title: true,
+        author: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
         board: {
-          include: {
-            workspace: true,
+          select: {
+            slug: true,
+            workspace: {
+              select: {
+                slug: true,
+                name: true,
+              },
+            },
           },
         },
       },
@@ -76,15 +90,32 @@ export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
   try {
     const post = await db.post.findUnique({
       where: { id: postId },
-      include: {
-        author: true,
+      select: {
+        id: true,
+        title: true,
+        body: true,
+        authorId: true,
+        author: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
         board: {
-          include: {
+          select: {
+            slug: true,
+            name: true,
             workspace: {
-              include: {
+              select: {
+                slug: true,
+                name: true,
                 users: {
                   where: {
                     role: { in: ["ADMIN", "OWNER"] },
+                  },
+                  select: {
+                    id: true,
+                    email: true,
                   },
                 },
               },
