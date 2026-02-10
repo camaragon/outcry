@@ -33,7 +33,6 @@ export async function notifyStatusChange({
 }: NotifyStatusChangeParams) {
   if (oldStatus === newStatus) return;
   if (!resend) return;
-  if (!author.email) return;
 
   try {
     const postUrl = `${APP_URL}/b/${workspaceSlug}/${boardSlug}/${postId}`;
@@ -70,7 +69,6 @@ interface NotifyNewFeedbackParams {
  */
 export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
   if (!resend) return;
-  const client = resend;
 
   try {
     const post = await db.post.findUnique({
@@ -113,17 +111,19 @@ export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
     if (!post) return;
 
     const workspace = post.board.workspace;
-    const admins = workspace.users.filter((u) => u.email && u.id !== post.authorId);
+    const admins = workspace.users.filter((u) => u.id !== post.authorId);
 
     if (admins.length === 0) return;
 
     const postUrl = `${APP_URL}/b/${workspace.slug}/${post.board.slug}/${post.id}`;
-    const dashboardUrl = `${APP_URL}/dashboard`;
+    const dashboardUrl = `${APP_URL}/b/${workspace.slug}`;
 
-    // Send to all admins
-    await Promise.all(
+    // Send to all admins — allSettled so one failure doesn't cancel the rest
+    // Local const needed because TS can't narrow the module-level `resend` inside closures
+    const send = resend.emails.send.bind(resend.emails);
+    const results = await Promise.allSettled(
       admins.map((admin) =>
-        client.emails.send({
+        send({
           from: FROM_EMAIL,
           to: admin.email,
           subject: `New feedback: ${post.title}`,
@@ -141,8 +141,11 @@ export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
       )
     );
 
+    const sent = results.filter((r) => r.status === "fulfilled").length;
+    const failed = results.filter((r) => r.status === "rejected").length;
+
     console.log(
-      `[NOTIFICATIONS] Sent new feedback email to ${admins.length} admin(s) for post ${post.id}`
+      `[NOTIFICATIONS] New feedback email for post ${post.id}: ${sent} sent, ${failed} failed`
     );
   } catch (error) {
     console.error("[NOTIFICATIONS] Failed to send new feedback email:", error);

@@ -9,7 +9,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import { formatStatus } from "@/lib/status-labels";
+import { formatStatus } from "../lib/status-labels";
 import { main, container, heading, text, card, button, footer } from "./styles";
 
 interface StatusChangeEmailProps {
