@@ -6,8 +6,6 @@ if (!process.env.RESEND_API_KEY) {
 
 export const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Use verified domain in production, Resend sandbox in dev
+// Use verified outcry.app domain; fall back to Resend sandbox if needed
 export const FROM_EMAIL =
-  process.env.NODE_ENV === "production"
-    ? "Outcry <notifications@outcry.app>"
-    : "Outcry <onboarding@resend.dev>";
+  process.env.RESEND_FROM_EMAIL || "Outcry <notifications@outcry.app>";
