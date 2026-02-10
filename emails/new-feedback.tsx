@@ -70,7 +70,7 @@ export default function NewFeedbackEmail({
           </Text>
 
           <Text style={footer}>
-            You're receiving this because you're an admin of {workspaceName}.
+            You&apos;re receiving this because you&apos;re an admin of {workspaceName}.
           </Text>
         </Container>
       </Body>

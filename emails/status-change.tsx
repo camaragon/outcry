@@ -60,7 +60,7 @@ export default function StatusChangeEmail({
           </Link>
 
           <Text style={footer}>
-            You're receiving this because you submitted feedback on{" "}
+            You&apos;re receiving this because you submitted feedback on{" "}
             {workspaceName}.
           </Text>
         </Container>
