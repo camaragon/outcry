@@ -10,6 +10,7 @@ import {
   Text,
 } from "@react-email/components";
 import { formatStatus } from "@/lib/status-labels";
+import { main, container, heading, text, card, button, footer } from "./styles";
 
 interface StatusChangeEmailProps {
   userName: string;
@@ -68,41 +69,7 @@ export default function StatusChangeEmail({
   );
 }
 
-// Styles
-const main = {
-  backgroundColor: "#f6f9fc",
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
-
-const container = {
-  backgroundColor: "#ffffff",
-  margin: "0 auto",
-  padding: "40px 20px",
-  maxWidth: "560px",
-};
-
-const heading = {
-  fontSize: "24px",
-  fontWeight: "600",
-  color: "#1a1a1a",
-  margin: "0 0 24px",
-};
-
-const text = {
-  fontSize: "16px",
-  lineHeight: "24px",
-  color: "#4a4a4a",
-  margin: "0 0 16px",
-};
-
-const card = {
-  backgroundColor: "#f9fafb",
-  borderRadius: "8px",
-  padding: "20px",
-  margin: "24px 0",
-};
-
+// Template-specific styles
 const postTitleStyle = {
   fontSize: "18px",
   fontWeight: "500",
@@ -114,21 +81,4 @@ const statusChange = {
   fontSize: "16px",
   color: "#6b7280",
   margin: "0",
-};
-
-const button = {
-  backgroundColor: "#000000",
-  borderRadius: "6px",
-  color: "#ffffff",
-  display: "inline-block",
-  fontSize: "16px",
-  fontWeight: "500",
-  padding: "12px 24px",
-  textDecoration: "none",
-};
-
-const footer = {
-  fontSize: "14px",
-  color: "#9ca3af",
-  margin: "32px 0 0",
 };

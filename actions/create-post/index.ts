@@ -52,25 +52,22 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   }
 
   // Background tasks after response is sent (survives serverless shutdown)
+  // Run in parallel — one failure shouldn't cancel the other
   after(async () => {
-    // Generate embedding for AI similarity
-    try {
-      const embedding = await generateEmbedding(`${title} ${body}`);
-      if (!embedding) return;
-      const embeddingStr = `[${embedding.join(",")}]`;
-      await db.$executeRaw`
-        UPDATE "Post" SET embedding = ${embeddingStr}::vector WHERE id = ${post.id}
-      `;
-    } catch (err) {
-      console.error("[embedding] Failed to generate embedding:", err);
-    }
-
-    // Notify workspace admins of new feedback
-    try {
-      await notifyNewFeedback({ postId: post.id });
-    } catch (err) {
-      console.error("[notifications] Failed to notify admins:", err);
-    }
+    await Promise.allSettled([
+      generateEmbedding(`${title} ${body}`)
+        .then(async (embedding) => {
+          if (!embedding) return;
+          const embeddingStr = `[${embedding.join(",")}]`;
+          await db.$executeRaw`
+            UPDATE "Post" SET embedding = ${embeddingStr}::vector WHERE id = ${post.id}
+          `;
+        })
+        .catch((err) => console.error("[embedding] Failed to generate embedding:", err)),
+      notifyNewFeedback({ postId: post.id }).catch((err) =>
+        console.error("[notifications] Failed to notify admins:", err)
+      ),
+    ]);
   });
 
   revalidatePath(`/b/${board.workspace.slug}/${board.slug}`);

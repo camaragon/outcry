@@ -8,69 +8,52 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://outcry.app";
 
 interface NotifyStatusChangeParams {
   postId: string;
+  postTitle: string;
   oldStatus: string;
   newStatus: string;
+  author: { id: string; email: string; name: string | null };
+  boardSlug: string;
+  workspaceSlug: string;
+  workspaceName: string;
 }
 
 /**
- * Notify the post author when their feedback status changes
+ * Notify the post author when their feedback status changes.
+ * Accepts pre-fetched data to avoid a redundant DB round-trip.
  */
 export async function notifyStatusChange({
   postId,
+  postTitle,
   oldStatus,
   newStatus,
+  author,
+  boardSlug,
+  workspaceSlug,
+  workspaceName,
 }: NotifyStatusChangeParams) {
-  // Skip if status didn't actually change or Resend is not configured
   if (oldStatus === newStatus) return;
   if (!resend) return;
+  if (!author.email) return;
 
   try {
-    const post = await db.post.findUnique({
-      where: { id: postId },
-      select: {
-        id: true,
-        title: true,
-        author: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
-        board: {
-          select: {
-            slug: true,
-            workspace: {
-              select: {
-                slug: true,
-                name: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!post || !post.author.email) return;
-
-    const postUrl = `${APP_URL}/b/${post.board.workspace.slug}/${post.board.slug}/${post.id}`;
+    const postUrl = `${APP_URL}/b/${workspaceSlug}/${boardSlug}/${postId}`;
 
     await resend.emails.send({
       from: FROM_EMAIL,
-      to: post.author.email,
+      to: author.email,
       subject: `Your feedback is now ${formatStatus(newStatus)}`,
       react: StatusChangeEmail({
-        userName: post.author.name || "there",
-        postTitle: post.title,
+        userName: author.name || "there",
+        postTitle,
         oldStatus,
         newStatus,
         postUrl,
-        workspaceName: post.board.workspace.name,
+        workspaceName,
       }),
     });
 
     console.log(
-      `[NOTIFICATIONS] Sent status change email for post ${post.id} (authorId: ${post.author.id})`
+      `[NOTIFICATIONS] Sent status change email for post ${postId} (authorId: ${author.id})`
     );
   } catch (error) {
     console.error("[NOTIFICATIONS] Failed to send status change email:", error);
@@ -82,7 +65,8 @@ interface NotifyNewFeedbackParams {
 }
 
 /**
- * Notify workspace admins when new feedback is submitted
+ * Notify workspace admins when new feedback is submitted.
+ * Still queries DB since create-post doesn't fetch admin list.
  */
 export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
   if (!resend) return;

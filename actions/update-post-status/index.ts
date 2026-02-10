@@ -19,13 +19,15 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       where: { id: postId },
       select: {
         id: true,
-        status: true, // Get current status for notification
+        title: true,
+        status: true,
+        author: { select: { id: true, email: true, name: true } },
         board: {
           select: {
             id: true,
             workspaceId: true,
             slug: true,
-            workspace: { select: { slug: true } },
+            workspace: { select: { slug: true, name: true } },
           },
         },
       },
@@ -69,7 +71,16 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   // Notify the post author after response is sent (survives serverless shutdown)
   after(async () => {
     try {
-      await notifyStatusChange({ postId, oldStatus, newStatus: status });
+      await notifyStatusChange({
+        postId,
+        postTitle: post.title,
+        oldStatus,
+        newStatus: status,
+        author: post.author,
+        boardSlug: post.board.slug,
+        workspaceSlug: post.board.workspace.slug,
+        workspaceName: post.board.workspace.name,
+      });
     } catch (err) {
       console.error("[UPDATE_POST_STATUS] Notification failed:", err);
     }
