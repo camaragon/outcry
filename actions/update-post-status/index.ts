@@ -1,9 +1,11 @@
 "use server";
 
 import { currentUser } from "@clerk/nextjs/server";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
+import { notifyStatusChange } from "@/lib/notifications";
 import { UpdatePostStatus } from "./schema";
 import { InputType, ReturnType } from "./types";
 
@@ -17,12 +19,15 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       where: { id: postId },
       select: {
         id: true,
+        title: true,
+        status: true,
+        author: { select: { id: true, email: true, name: true } },
         board: {
           select: {
             id: true,
             workspaceId: true,
             slug: true,
-            workspace: { select: { slug: true } },
+            workspace: { select: { slug: true, name: true } },
           },
         },
       },
@@ -51,6 +56,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "You do not have permission to update post status." };
   }
 
+  const oldStatus = post.status;
   let updatedPost;
 
   try {
@@ -61,6 +67,24 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   } catch {
     return { error: "Failed to update post status. Please try again." };
   }
+
+  // Notify the post author after response is sent (survives serverless shutdown)
+  after(async () => {
+    try {
+      await notifyStatusChange({
+        postId,
+        postTitle: post.title,
+        oldStatus,
+        newStatus: status,
+        author: post.author,
+        boardSlug: post.board.slug,
+        workspaceSlug: post.board.workspace.slug,
+        workspaceName: post.board.workspace.name,
+      });
+    } catch (err) {
+      console.error("[UPDATE_POST_STATUS] Notification failed:", err);
+    }
+  });
 
   revalidatePath(`/dashboard/board/${post.board.id}`);
   revalidatePath(`/b/${post.board.workspace.slug}/${post.board.slug}`);
