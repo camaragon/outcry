@@ -6,5 +6,8 @@ if (!process.env.RESEND_API_KEY) {
 
 export const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Default from address (update when you have a verified domain)
-export const FROM_EMAIL = "Outcry <notifications@outcry.app>";
+// Use verified domain in production, Resend sandbox in dev
+export const FROM_EMAIL =
+  process.env.NODE_ENV === "production"
+    ? "Outcry <notifications@outcry.app>"
+    : "Outcry <onboarding@resend.dev>";
