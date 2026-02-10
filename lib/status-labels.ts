@@ -1,16 +1,9 @@
 /**
- * Human-readable labels for post statuses.
- * Single source of truth — used in notifications and email templates.
+ * Human-readable status formatting — derives from the canonical post-statuses module.
  */
-export const STATUS_LABELS: Record<string, string> = {
-  OPEN: "Open",
-  UNDER_REVIEW: "Under Review",
-  PLANNED: "Planned",
-  IN_PROGRESS: "In Progress",
-  COMPLETE: "Complete",
-  CLOSED: "Closed",
-};
+import { STATUS_LABELS, type PostStatus } from "./post-statuses";
 
-export function formatStatus(status: string): string {
-  return STATUS_LABELS[status] || status;
+export function formatStatus(status: PostStatus | string): string {
+  const entry = STATUS_LABELS[status as PostStatus];
+  return entry?.label ?? String(status);
 }

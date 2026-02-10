@@ -6,6 +6,11 @@ import { db } from "./db";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://outcry.app";
 
+/** Strip CR/LF and truncate for safe use in email subjects */
+function sanitizeSubject(text: string, maxLength = 100): string {
+  return text.replace(/[\r\n]+/g, " ").trim().slice(0, maxLength);
+}
+
 interface NotifyStatusChangeParams {
   postId: string;
   postTitle: string;
@@ -40,7 +45,7 @@ export async function notifyStatusChange({
     await resend.emails.send({
       from: FROM_EMAIL,
       to: author.email,
-      subject: `Your feedback is now ${formatStatus(newStatus)}`,
+      subject: sanitizeSubject(`Your feedback is now ${formatStatus(newStatus)}`),
       react: StatusChangeEmail({
         userName: author.name || "there",
         postTitle,
@@ -126,7 +131,7 @@ export async function notifyNewFeedback({ postId }: NotifyNewFeedbackParams) {
         send({
           from: FROM_EMAIL,
           to: admin.email,
-          subject: `New feedback: ${post.title}`,
+          subject: sanitizeSubject(`New feedback: ${post.title}`),
           react: NewFeedbackEmail({
             postTitle: post.title,
             postBody: post.body,
