@@ -1,11 +1,10 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Tags, Crown } from "lucide-react";
+import { Tags } from "lucide-react";
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { UpgradeButton } from "@/components/upgrade-button";
+import { DashboardHeaderMenu } from "./_components/dashboard-header-menu";
 
 export default async function DashboardPage() {
   const user = await currentUser();
@@ -50,19 +49,10 @@ export default async function DashboardPage() {
             overview.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {workspace.plan === "PRO" && (
-            <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-medium text-white">
-              <Crown className="size-3" />
-              Pro
-            </span>
-          )}
-          <UpgradeButton
-            workspaceId={workspace.id}
-            isPro={workspace.plan === "PRO"}
-          />
-          <ThemeToggle />
-        </div>
+        <DashboardHeaderMenu
+          workspaceId={workspace.id}
+          isPro={workspace.plan === "PRO"}
+        />
       </div>
 
       {/* Stats */}
