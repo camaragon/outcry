@@ -58,7 +58,7 @@ export function BoardHeaderMenu({
         {isSignedIn && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/" })}>
+            <DropdownMenuItem onSelect={() => signOut({ redirectUrl: "/" })}>
               <LogOut className="mr-2 size-4" />
               Sign Out
             </DropdownMenuItem>

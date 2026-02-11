@@ -29,7 +29,7 @@ export function ThemeSubMenu() {
         {THEME_OPTIONS.map((option) => (
           <DropdownMenuItem
             key={option.value}
-            onClick={() => setTheme(option.value)}
+            onSelect={() => setTheme(option.value)}
             className="flex items-center justify-between"
           >
             {option.label}

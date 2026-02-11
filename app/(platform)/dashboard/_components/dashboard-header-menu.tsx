@@ -9,6 +9,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -35,7 +36,14 @@ export function DashboardHeaderMenu({
         body: JSON.stringify({ workspaceId }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      let data: { error?: string; url?: string };
+
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { error: text };
+      }
 
       if (!response.ok) {
         toast.error(data.error || "Checkout failed");
@@ -66,14 +74,14 @@ export function DashboardHeaderMenu({
       <DropdownMenuContent align="end">
         {isPro && (
           <>
-            <div className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground">
+            <DropdownMenuLabel className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Crown className="size-3" />
-              <span className="font-medium">PRO</span>
-            </div>
+              PRO
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
           </>
         )}
-        <DropdownMenuItem onClick={handleBillingClick} disabled={isLoading}>
+        <DropdownMenuItem onSelect={handleBillingClick} disabled={isLoading}>
           {isLoading ? (
             <Loader2 className="mr-2 size-4 animate-spin" />
           ) : (
@@ -84,7 +92,7 @@ export function DashboardHeaderMenu({
         <DropdownMenuSeparator />
         <ThemeSubMenu />
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/" })}>
+        <DropdownMenuItem onSelect={() => signOut({ redirectUrl: "/" })}>
           <LogOut className="mr-2 size-4" />
           Sign Out
         </DropdownMenuItem>
