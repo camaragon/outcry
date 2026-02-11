@@ -110,6 +110,7 @@ export default async function PublicBoardPage({
           boardSlug={boardSlug}
           boardId={board.id}
           isAdmin={isAdmin}
+          isSignedIn={isSignedIn}
         />
       </div>
 

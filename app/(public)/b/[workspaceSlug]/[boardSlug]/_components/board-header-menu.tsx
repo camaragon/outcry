@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Map, Menu, Moon, Settings, Sun } from "lucide-react";
+import { Check, LogOut, Map, Menu, Moon, Settings, Sun } from "lucide-react";
+import { useClerk } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +27,7 @@ interface BoardHeaderMenuProps {
   boardSlug: string;
   boardId: string;
   isAdmin: boolean;
+  isSignedIn: boolean;
 }
 
 export function BoardHeaderMenu({
@@ -33,7 +35,9 @@ export function BoardHeaderMenu({
   boardSlug,
   boardId,
   isAdmin,
+  isSignedIn,
 }: BoardHeaderMenuProps) {
+  const { signOut } = useClerk();
   const { theme, setTheme } = useTheme();
 
   return (
@@ -79,6 +83,15 @@ export function BoardHeaderMenu({
             ))}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
+        {isSignedIn && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/" })}>
+              <LogOut className="mr-2 size-4" />
+              Sign Out
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

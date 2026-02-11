@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Crown, Loader2, Menu, Moon, Sparkles, Sun } from "lucide-react";
+import { Check, Crown, Loader2, LogOut, Menu, Moon, Sparkles, Sun } from "lucide-react";
+import { useClerk } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export function DashboardHeaderMenu({
   workspaceId,
   isPro,
 }: DashboardHeaderMenuProps) {
+  const { signOut } = useClerk();
   const { theme, setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -103,6 +105,11 @@ export function DashboardHeaderMenu({
             ))}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/" })}>
+          <LogOut className="mr-2 size-4" />
+          Sign Out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
