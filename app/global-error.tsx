@@ -33,12 +33,13 @@ const contentStyle = {
 const buttonStyle = {
   padding: "0.5rem 1.5rem",
   borderRadius: "0.5rem",
-  border: "1px solid #333",
+  border: "1px solid #444",
   backgroundColor: "#171717",
   color: "#e5e5e5",
   cursor: "pointer" as const,
   fontSize: "0.875rem",
   fontWeight: 500,
+  transition: "border-color 0.15s, background-color 0.15s",
 };
 
 const linkStyle = {
@@ -48,6 +49,7 @@ const linkStyle = {
   textDecoration: "none" as const,
   fontSize: "0.875rem",
   fontWeight: 500,
+  transition: "color 0.15s",
 };
 
 const buttonGroupStyle = {
@@ -74,8 +76,13 @@ export default function GlobalError({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="noindex" />
         <title>Something went wrong</title>
+        <style>{`
+          .ge-btn:hover, .ge-btn:focus-visible { border-color: #666; background-color: #222; }
+          .ge-link:hover, .ge-link:focus-visible { color: #e5e5e5; }
+          .ge-btn:focus-visible, .ge-link:focus-visible { outline: 2px solid #666; outline-offset: 2px; }
+        `}</style>
       </head>
-      <body>
+      <body style={{ margin: 0 }}>
         <div style={containerStyle}>
           <div style={contentStyle}>
             <h1 style={headingStyle}>Something went wrong</h1>
@@ -83,10 +90,10 @@ export default function GlobalError({
               An unexpected error occurred. Please try again.
             </p>
             <div style={buttonGroupStyle}>
-              <button onClick={reset} style={buttonStyle}>
+              <button onClick={reset} className="ge-btn" style={buttonStyle}>
                 Try Again
               </button>
-              <a href="/" style={linkStyle}>
+              <a href="/" className="ge-link" style={linkStyle}>
                 Go Home
               </a>
             </div>
