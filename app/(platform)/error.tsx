@@ -4,7 +4,7 @@ import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function PlatformError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };

@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function PublicError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };
@@ -27,7 +28,7 @@ export default function PublicError({
             Try Again
           </Button>
           <Button asChild variant="ghost" size="sm">
-            <a href="/">Go Home</a>
+            <Link href="/">Go Home</Link>
           </Button>
         </div>
       </div>
