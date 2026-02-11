@@ -93,6 +93,7 @@ export default function GlobalError({
               <button onClick={reset} className="ge-btn" style={buttonStyle}>
                 Try Again
               </button>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global-error replaces the root layout; next/link may be unavailable */}
               <a href="/" className="ge-link" style={linkStyle}>
                 Go Home
               </a>
