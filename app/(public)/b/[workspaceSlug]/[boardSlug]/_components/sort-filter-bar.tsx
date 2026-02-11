@@ -64,10 +64,10 @@ export function SortFilterBar({
   );
 
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-3">
+    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       {/* Sort */}
       <div className="flex items-center gap-1.5">
-        <ArrowDownUp className="size-4 text-muted-foreground" />
+        <ArrowDownUp className="size-4 shrink-0 text-muted-foreground" />
         <div className="flex gap-1">
           {SORT_OPTIONS.map((opt) => (
             <Button
@@ -82,15 +82,15 @@ export function SortFilterBar({
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 ml-auto">
-        <Filter className="size-4 text-muted-foreground" />
+      <div className="flex items-center gap-1.5 sm:ml-auto">
+        <Filter className="size-4 shrink-0 text-muted-foreground" />
 
         {/* Status filter */}
         <Select
           value={currentStatus}
           onValueChange={(val) => updateParam("status", val)}
         >
-          <SelectTrigger className="w-[150px] h-9 text-sm">
+          <SelectTrigger className="h-9 w-full min-w-0 sm:w-[150px] text-sm">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -109,7 +109,7 @@ export function SortFilterBar({
             value={currentCategory}
             onValueChange={(val) => updateParam("category", val)}
           >
-            <SelectTrigger className="w-[150px] h-9 text-sm">
+            <SelectTrigger className="h-9 w-full min-w-0 sm:w-[150px] text-sm">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>

@@ -71,13 +71,14 @@ export default async function PublicRoadmapPage({
     <div>
       {/* Header */}
       <header className="border-b">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <div className="flex items-center gap-4">
+        <div className="mx-auto flex h-auto min-h-[4rem] max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:h-16 sm:flex-nowrap sm:py-0">
+          <div className="flex items-center gap-2 sm:gap-4">
             {boardSlug && (
               <Button variant="ghost" size="sm" asChild>
                 <Link href={`/b/${workspaceSlug}/${boardSlug}`}>
                   <ArrowLeft className="size-4" />
-                  Back to board
+                  <span className="hidden sm:inline">Back to board</span>
+                  <span className="sm:hidden">Back</span>
                 </Link>
               </Button>
             )}
