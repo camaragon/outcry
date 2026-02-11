@@ -25,6 +25,11 @@ const paragraphStyle = {
   marginBottom: "1.5rem",
 };
 
+const contentStyle = {
+  textAlign: "center" as const,
+  maxWidth: "28rem",
+};
+
 const buttonStyle = {
   padding: "0.5rem 1.5rem",
   borderRadius: "0.5rem",
@@ -56,7 +61,7 @@ export default function GlobalError({
       </head>
       <body>
         <div style={containerStyle}>
-          <div style={{ textAlign: "center", maxWidth: "28rem" }}>
+          <div style={contentStyle}>
             <h1 style={headingStyle}>Something went wrong</h1>
             <p style={paragraphStyle}>
               An unexpected error occurred. Please try again.
