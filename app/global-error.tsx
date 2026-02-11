@@ -41,6 +41,21 @@ const buttonStyle = {
   fontWeight: 500,
 };
 
+const linkStyle = {
+  padding: "0.5rem 1.5rem",
+  borderRadius: "0.5rem",
+  color: "#a3a3a3",
+  textDecoration: "none" as const,
+  fontSize: "0.875rem",
+  fontWeight: 500,
+};
+
+const buttonGroupStyle = {
+  display: "flex",
+  gap: "0.5rem",
+  justifyContent: "center" as const,
+};
+
 export default function GlobalError({
   error,
   reset,
@@ -57,6 +72,7 @@ export default function GlobalError({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex" />
         <title>Something went wrong</title>
       </head>
       <body>
@@ -66,9 +82,14 @@ export default function GlobalError({
             <p style={paragraphStyle}>
               An unexpected error occurred. Please try again.
             </p>
-            <button onClick={reset} style={buttonStyle}>
-              Try Again
-            </button>
+            <div style={buttonGroupStyle}>
+              <button onClick={reset} style={buttonStyle}>
+                Try Again
+              </button>
+              <a href="/" style={linkStyle}>
+                Go Home
+              </a>
+            </div>
           </div>
         </div>
       </body>
