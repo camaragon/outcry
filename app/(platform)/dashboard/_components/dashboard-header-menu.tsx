@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Crown, Loader2, LogOut, Menu, Moon, Sparkles, Sun } from "lucide-react";
+import { Crown, Loader2, LogOut, Menu, Sparkles } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
-import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,11 +10,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeSubMenu } from "@/components/theme-sub-menu";
 
 interface DashboardHeaderMenuProps {
   workspaceId: string;
@@ -27,7 +24,6 @@ export function DashboardHeaderMenu({
   isPro,
 }: DashboardHeaderMenuProps) {
   const { signOut } = useClerk();
-  const { theme, setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleBillingClick = async () => {
@@ -86,25 +82,7 @@ export function DashboardHeaderMenu({
           {isPro ? "Manage Billing" : "Upgrade to Pro"}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <Sun className="mr-2 size-4 dark:hidden" />
-            <Moon className="mr-2 hidden size-4 dark:block" />
-            Theme
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            {(["light", "dark", "system"] as const).map((value) => (
-              <DropdownMenuItem
-                key={value}
-                onClick={() => setTheme(value)}
-                className="flex items-center justify-between"
-              >
-                {value.charAt(0).toUpperCase() + value.slice(1)}
-                {theme === value && <Check className="ml-2 size-4" />}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+        <ThemeSubMenu />
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/" })}>
           <LogOut className="mr-2 size-4" />
