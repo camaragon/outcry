@@ -16,7 +16,7 @@ export function WorkspaceUrlDisplay({ slug }: WorkspaceUrlDisplayProps) {
       <div className="mt-4 flex items-center gap-2 text-sm">
         <Globe className="size-4 text-muted-foreground" />
         <code className="rounded bg-muted px-2 py-1">
-          {baseUrl}/b/{slug}
+          {baseUrl}/b/{slug}/roadmap
         </code>
       </div>
     </div>

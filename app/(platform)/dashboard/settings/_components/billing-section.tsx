@@ -43,6 +43,8 @@ export function BillingSection({
 
       if (data.url) {
         window.location.href = data.url;
+      } else {
+        toast.error("Failed to open billing. Please try again.");
       }
     } catch {
       toast.error("Failed to open billing. Please try again.");

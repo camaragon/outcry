@@ -1,5 +1,5 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { db } from "@/lib/db";
@@ -13,12 +13,12 @@ export default async function SettingsPage() {
 
   if (!user?.id) redirect("/sign-in");
 
+  // First check if user has any workspace at all
   const dbUser = await db.user.findFirst({
-    where: {
-      clerkId: user.id,
-      role: { in: ["OWNER", "ADMIN"] },
-    },
-    include: {
+    where: { clerkId: user.id },
+    select: {
+      id: true,
+      role: true,
       workspace: {
         select: {
           id: true,
@@ -33,6 +33,11 @@ export default async function SettingsPage() {
 
   if (!dbUser?.workspace) {
     redirect("/onboarding");
+  }
+
+  // Settings requires OWNER or ADMIN
+  if (!["OWNER", "ADMIN"].includes(dbUser.role)) {
+    notFound();
   }
 
   const workspace = dbUser.workspace;

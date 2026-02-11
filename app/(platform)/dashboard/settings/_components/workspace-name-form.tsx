@@ -46,12 +46,17 @@ export function WorkspaceNameForm({
           This is the name displayed to your team and on public pages.
         </p>
         <div className="mt-4 flex gap-2">
+          <label htmlFor="workspace-name" className="sr-only">
+            Workspace name
+          </label>
           <Input
+            id="workspace-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="My Workspace"
             className="max-w-sm"
             disabled={isLoading}
+            aria-invalid={!!fieldErrors?.name}
             aria-describedby={fieldErrors?.name ? "name-error" : undefined}
           />
           <Button type="submit" size="sm" disabled={isLoading || !isDirty}>

@@ -4,6 +4,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { InputType, ReturnType } from "./types";
 import { db } from "@/lib/db";
+import { getAuthorizedUser } from "@/lib/get-authorized-user";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { UpdateWorkspace } from "./schema";
 
@@ -16,17 +17,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
   const { workspaceId, name } = data;
 
-  // Verify user is OWNER or ADMIN
-  const dbUser = await db.user.findFirst({
-    where: {
-      clerkId: user.id,
-      workspaceId,
-      role: { in: ["OWNER", "ADMIN"] },
-    },
-    select: { id: true },
-  });
+  const authorizedUser = await getAuthorizedUser(user.id, workspaceId);
 
-  if (!dbUser) {
+  if (!authorizedUser) {
     return { error: "Workspace not found or access denied." };
   }
 
@@ -41,8 +34,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "Failed to update workspace. Please try again." };
   }
 
-  revalidatePath("/dashboard");
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard", "layout");
+  revalidatePath("/b", "layout");
   return { data: workspace };
 };
 

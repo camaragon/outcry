@@ -19,11 +19,13 @@ import { ThemeSubMenu } from "@/components/theme-sub-menu";
 interface DashboardHeaderMenuProps {
   workspaceId: string;
   isPro: boolean;
+  isAdmin: boolean;
 }
 
 export function DashboardHeaderMenu({
   workspaceId,
   isPro,
+  isAdmin,
 }: DashboardHeaderMenuProps) {
   const { signOut } = useClerk();
   const [isLoading, setIsLoading] = useState(false);
@@ -96,12 +98,14 @@ export function DashboardHeaderMenu({
           )}
           {isPro ? "Manage Billing" : "Upgrade to Pro"}
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/dashboard/settings">
-            <Settings className="mr-2 size-4" />
-            Settings
-          </Link>
-        </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/settings">
+              <Settings className="mr-2 size-4" />
+              Settings
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <ThemeSubMenu />
         <DropdownMenuSeparator />
