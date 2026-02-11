@@ -9,5 +9,5 @@ export default function MarketingError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return <ErrorFallback error={error} reset={reset} />;
+  return <ErrorFallback error={error} reset={reset} boundary="MarketingError" />;
 }

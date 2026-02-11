@@ -10,6 +10,7 @@ interface ErrorFallbackProps {
   reset: () => void;
   message?: string;
   showHomeLink?: boolean;
+  boundary?: string;
 }
 
 export function ErrorFallback({
@@ -17,10 +18,11 @@ export function ErrorFallback({
   reset,
   message = "We couldn\u2019t load this page. Please try again.",
   showHomeLink = true,
+  boundary = "ErrorBoundary",
 }: ErrorFallbackProps) {
   useEffect(() => {
-    console.error(error);
-  }, [error]);
+    console.error(`[${boundary}]`, error);
+  }, [boundary, error]);
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">

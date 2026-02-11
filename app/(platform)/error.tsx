@@ -15,6 +15,7 @@ export default function PlatformError({
       reset={reset}
       message="We ran into an error loading this page. Please try again."
       showHomeLink={false}
+      boundary="PlatformError"
     />
   );
 }
