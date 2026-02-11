@@ -1,48 +1,67 @@
 "use client";
 
+import { useEffect } from "react";
+
+const containerStyle = {
+  display: "flex",
+  minHeight: "100vh",
+  flexDirection: "column" as const,
+  alignItems: "center" as const,
+  justifyContent: "center" as const,
+  padding: "1rem",
+  fontFamily: "system-ui, sans-serif",
+  color: "#e5e5e5",
+  backgroundColor: "#0a0a0a",
+};
+
+const headingStyle = {
+  fontSize: "1.5rem",
+  fontWeight: 700,
+  marginBottom: "0.5rem",
+};
+
+const paragraphStyle = {
+  color: "#a3a3a3",
+  marginBottom: "1.5rem",
+};
+
+const buttonStyle = {
+  padding: "0.5rem 1.5rem",
+  borderRadius: "0.5rem",
+  border: "1px solid #333",
+  backgroundColor: "#171717",
+  color: "#e5e5e5",
+  cursor: "pointer" as const,
+  fontSize: "0.875rem",
+  fontWeight: 500,
+};
+
 export default function GlobalError({
-  error: _error,
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
     <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Something went wrong</title>
+      </head>
       <body>
-        <div
-          style={{
-            display: "flex",
-            minHeight: "100vh",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-            fontFamily: "system-ui, sans-serif",
-            color: "#e5e5e5",
-            backgroundColor: "#0a0a0a",
-          }}
-        >
+        <div style={containerStyle}>
           <div style={{ textAlign: "center", maxWidth: "28rem" }}>
-            <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "0.5rem" }}>
-              Something went wrong
-            </h1>
-            <p style={{ color: "#a3a3a3", marginBottom: "1.5rem" }}>
+            <h1 style={headingStyle}>Something went wrong</h1>
+            <p style={paragraphStyle}>
               An unexpected error occurred. Please try again.
             </p>
-            <button
-              onClick={reset}
-              style={{
-                padding: "0.5rem 1.5rem",
-                borderRadius: "0.5rem",
-                border: "1px solid #333",
-                backgroundColor: "#171717",
-                color: "#e5e5e5",
-                cursor: "pointer",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-              }}
-            >
+            <button onClick={reset} style={buttonStyle}>
               Try Again
             </button>
           </div>
