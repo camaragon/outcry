@@ -81,7 +81,13 @@ export function DashboardHeaderMenu({
             <DropdownMenuSeparator />
           </>
         )}
-        <DropdownMenuItem onSelect={handleBillingClick} disabled={isLoading}>
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault();
+            handleBillingClick();
+          }}
+          disabled={isLoading}
+        >
           {isLoading ? (
             <Loader2 className="mr-2 size-4 animate-spin" />
           ) : (

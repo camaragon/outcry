@@ -8,12 +8,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const THEME_OPTIONS = [
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-  { value: "system", label: "System" },
-] as const;
+import { THEME_OPTIONS } from "@/components/theme-toggle";
 
 export function ThemeSubMenu() {
   const { theme, setTheme } = useTheme();
