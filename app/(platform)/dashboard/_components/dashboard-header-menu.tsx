@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Crown, Loader2, LogOut, Menu, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Crown, Loader2, LogOut, Menu, Settings, Sparkles } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -94,6 +95,12 @@ export function DashboardHeaderMenu({
             <Sparkles className="mr-2 size-4" />
           )}
           {isPro ? "Manage Billing" : "Upgrade to Pro"}
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard/settings">
+            <Settings className="mr-2 size-4" />
+            Settings
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <ThemeSubMenu />
