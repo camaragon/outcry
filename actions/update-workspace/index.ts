@@ -29,6 +29,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     workspace = await db.workspace.update({
       where: { id: workspaceId },
       data: { name },
+      select: { id: true, name: true },
     });
   } catch {
     return { error: "Failed to update workspace. Please try again." };

@@ -17,11 +17,13 @@ export function WorkspaceNameForm({
   initialName,
 }: WorkspaceNameFormProps) {
   const [name, setName] = useState(initialName);
+  const [savedName, setSavedName] = useState(initialName);
 
   const { execute, fieldErrors, error, isLoading } = useAction(
     updateWorkspace,
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        setSavedName(data.name);
         toast.success("Workspace name updated!");
       },
       onError: (error) => {
@@ -36,7 +38,7 @@ export function WorkspaceNameForm({
     execute({ workspaceId, name: name.trim() });
   };
 
-  const isDirty = name.trim() !== initialName;
+  const isDirty = name.trim() !== savedName;
 
   return (
     <form onSubmit={handleSubmit}>

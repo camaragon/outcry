@@ -14,7 +14,7 @@ export default async function SettingsPage() {
   if (!user?.id) redirect("/sign-in");
 
   // First check if user has any workspace at all
-  const dbUser = await db.user.findFirst({
+  const dbUser = await db.user.findUnique({
     where: { clerkId: user.id },
     select: {
       id: true,
