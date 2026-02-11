@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Crown, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { redirectToCheckout } from "@/lib/checkout";
 
 interface BillingSectionProps {
   workspaceId: string;
@@ -21,33 +22,9 @@ export function BillingSection({
   const handleBillingClick = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId }),
-      });
-
-      const text = await response.text();
-      let data: { error?: string; url?: string };
-
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        data = { error: text };
-      }
-
-      if (!response.ok) {
-        toast.error(data.error || "Failed to open billing");
-        return;
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        toast.error("Failed to open billing. Please try again.");
-      }
-    } catch {
-      toast.error("Failed to open billing. Please try again.");
+      await redirectToCheckout(workspaceId);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to open billing");
     } finally {
       setIsLoading(false);
     }
