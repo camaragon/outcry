@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Crown, Loader2, LogOut, Menu, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Crown, Loader2, LogOut, Menu, Settings, Sparkles } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { redirectToCheckout } from "@/lib/checkout";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,11 +20,13 @@ import { ThemeSubMenu } from "@/components/theme-sub-menu";
 interface DashboardHeaderMenuProps {
   workspaceId: string;
   isPro: boolean;
+  isAdmin: boolean;
 }
 
 export function DashboardHeaderMenu({
   workspaceId,
   isPro,
+  isAdmin,
 }: DashboardHeaderMenuProps) {
   const { signOut } = useClerk();
   const [isLoading, setIsLoading] = useState(false);
@@ -30,34 +34,9 @@ export function DashboardHeaderMenu({
   const handleBillingClick = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId }),
-      });
-
-      const text = await response.text();
-      let data: { error?: string; url?: string };
-
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        data = { error: text };
-      }
-
-      if (!response.ok) {
-        toast.error(data.error || "Checkout failed");
-        return;
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        toast.error("Failed to start checkout. Please try again.");
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      toast.error("Failed to start checkout. Please try again.");
+      await redirectToCheckout(workspaceId);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Checkout failed");
     } finally {
       setIsLoading(false);
     }
@@ -95,6 +74,14 @@ export function DashboardHeaderMenu({
           )}
           {isPro ? "Manage Billing" : "Upgrade to Pro"}
         </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/settings">
+              <Settings className="mr-2 size-4" />
+              Settings
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <ThemeSubMenu />
         <DropdownMenuSeparator />

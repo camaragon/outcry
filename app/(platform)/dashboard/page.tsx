@@ -52,6 +52,7 @@ export default async function DashboardPage() {
         <DashboardHeaderMenu
           workspaceId={workspace.id}
           isPro={workspace.plan === "PRO"}
+          isAdmin={["OWNER", "ADMIN"].includes(dbUser.role)}
         />
       </div>
 
