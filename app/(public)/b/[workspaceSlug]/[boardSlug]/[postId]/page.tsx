@@ -94,7 +94,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
       </Link>
 
       {/* Post content */}
-      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start">
+      <div className="mt-4 flex flex-col items-start gap-4 sm:flex-row sm:items-start">
         <UpvoteButton
           postId={post.id}
           voteCount={post.voteCount}
