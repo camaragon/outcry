@@ -404,24 +404,24 @@ model ChangelogPost {
 ## Sprint Plan
 
 ### Week 1: Foundation
-- [ ] Initialize Next.js 16 monorepo (TypeScript, Tailwind, shadcn/ui)
-- [ ] Prisma + Neon setup (schema push, pgvector extension)
-- [ ] Clerk auth (sign-in/up, organizations)
-- [ ] Multi-tenant subdomain middleware
-- [ ] CRUD: Workspaces, Boards, Posts, Votes, Comments (flat)
-- [ ] Admin dashboard: feedback list with status management + filters
+- [x] Initialize Next.js 16 monorepo (TypeScript, Tailwind, shadcn/ui)
+- [x] Prisma + Neon setup (schema push, pgvector extension)
+- [x] Clerk auth (sign-in/up, organizations)
+- [x] Multi-tenant subdomain middleware
+- [x] CRUD: Workspaces, Boards, Posts, Votes, Comments (flat)
+- [x] Admin dashboard: feedback list with status management + filters
 
 ### Week 2: Public UI + AI
-- [ ] Public board UI (post list, voting, commenting)
-- [ ] Public roadmap view (kanban by status)
-- [ ] AI duplicate detection (OpenAI embeddings + pgvector)
-- [ ] Stripe integration (Checkout, webhooks, billing page)
-- [ ] Landing page (outcry.app)
-- [ ] Basic post merging
+- [x] Public board UI (post list, voting, commenting)
+- [x] Public roadmap view (kanban by status)
+- [x] AI duplicate detection (OpenAI embeddings + pgvector)
+- [x] Stripe integration (Checkout, webhooks, billing page)
+- [x] Landing page (outcry.app)
+- [ ] Basic post merging — see [#30](https://github.com/camaragon/outcry/issues/30)
 
 ### Week 3: Polish + Soft Launch
-- [ ] Email notifications via Resend (status changes, new feedback)
-- [ ] SEO content (Canny alternatives blog post)
+- [x] Email notifications via Resend (status changes, new feedback)
+- [~] SEO content (Canny alternatives blog post) — in progress: blog post written, pending final review and publish
 - [ ] Beta testing with real users
 - [ ] Reddit distribution (drop into Canny complaint threads)
 
