@@ -421,7 +421,7 @@ model ChangelogPost {
 
 ### Week 3: Polish + Soft Launch
 - [x] Email notifications via Resend (status changes, new feedback)
-- [ ] SEO content (Canny alternatives blog post) — draft ready, needs publish
+- [~] SEO content (Canny alternatives blog post) — in progress: blog post written, pending final review and publish
 - [ ] Beta testing with real users
 - [ ] Reddit distribution (drop into Canny complaint threads)
 
