@@ -32,7 +32,7 @@ export function PostCard({
   const statusInfo = STATUS_LABELS[post.status] ?? STATUS_LABELS.OPEN;
 
   return (
-    <div className="flex items-start gap-4 rounded-lg border p-4 transition hover:border-foreground/20 hover:shadow-sm">
+    <div className="flex items-start gap-3 rounded-lg border p-3 transition hover:border-foreground/20 hover:shadow-sm sm:gap-4 sm:p-4">
       <UpvoteButton
         postId={post.id}
         voteCount={post.voteCount}

@@ -94,7 +94,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
       </Link>
 
       {/* Post content */}
-      <div className="mt-4 flex items-start gap-4">
+      <div className="mt-4 flex flex-col items-start gap-4 sm:flex-row sm:items-start">
         <UpvoteButton
           postId={post.id}
           voteCount={post.voteCount}
@@ -104,7 +104,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-bold">{post.title}</h1>
+            <h1 className="text-xl font-bold sm:text-2xl">{post.title}</h1>
             <Badge variant={statusInfo.variant} className="text-xs">
               {statusInfo.label}
             </Badge>
