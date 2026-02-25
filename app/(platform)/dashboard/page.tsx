@@ -8,8 +8,7 @@ import { DashboardHeaderMenu } from "./_components/dashboard-header-menu";
 
 export default async function DashboardPage() {
   const user = await currentUser();
-  // auth.protect() in proxy.ts already guards this route
-  if (!user?.id) return null;
+  if (!user?.id) redirect("/sign-in");
 
   // Find user's workspace
   const dbUser = await db.user.findFirst({
