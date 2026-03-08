@@ -53,3 +53,7 @@ export const footer = {
   color: "#9ca3af",
   margin: "32px 0 0",
 };
+
+export const logoHeader = {
+  marginBottom: "32px",
+};

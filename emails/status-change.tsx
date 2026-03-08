@@ -4,13 +4,14 @@ import {
   Head,
   Heading,
   Html,
+  Img,
   Link,
   Preview,
   Section,
   Text,
 } from "@react-email/components";
 import { formatStatus } from "../lib/status-labels";
-import { main, container, heading, text, card, button, footer } from "./styles";
+import { main, container, heading, text, card, button, footer, logoHeader } from "./styles";
 
 interface StatusChangeEmailProps {
   userName: string;
@@ -40,6 +41,14 @@ export default function StatusChangeEmail({
       </Preview>
       <Body style={main}>
         <Container style={container}>
+          <Section style={logoHeader}>
+            <Img
+              src="https://outcry.app/logo.png"
+              alt="Outcry"
+              width="100"
+              height="32"
+            />
+          </Section>
           <Heading style={heading}>Status Update</Heading>
 
           <Text style={text}>Hi {userName},</Text>

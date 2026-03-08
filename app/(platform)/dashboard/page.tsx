@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Tags } from "lucide-react";
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 import { DashboardHeaderMenu } from "./_components/dashboard-header-menu";
 
 export default async function DashboardPage() {
@@ -41,14 +42,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{workspace.name}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Welcome back, {user.firstName || "there"}! Here&apos;s your workspace
-            overview.
-          </p>
-        </div>
+      {/* Dashboard top bar */}
+      <div className="mb-8 flex items-center justify-between border-b pb-6">
+        <Logo href="/dashboard" size="sm" />
         <DashboardHeaderMenu
           workspaceId={workspace.id}
           isPro={workspace.plan === "PRO"}
