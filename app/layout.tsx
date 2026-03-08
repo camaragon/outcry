@@ -9,6 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://outcry.app"),
   title: "Outcry — Boards that think",
   description:
     "AI-native feedback and roadmap tool. Collect, organize, and prioritize product feedback with AI-powered duplicate detection.",
