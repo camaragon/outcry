@@ -26,7 +26,6 @@ export function Logo({ href = "/", className, size = "md" }: LogoProps) {
         width={width}
         height={height}
         className="block dark:hidden"
-        priority
       />
       {/* Dark mode logo */}
       <Image
@@ -35,7 +34,6 @@ export function Logo({ href = "/", className, size = "md" }: LogoProps) {
         width={width}
         height={height}
         className="hidden dark:block"
-        priority
       />
     </>
   );

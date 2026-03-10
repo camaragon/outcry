@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Outcry — Boards that think",
     description:
       "AI-native feedback and roadmap tool. Collect, organize, and prioritize product feedback with AI-powered duplicate detection.",
-    images: [{ url: "/logo.png", width: 167, height: 53, alt: "Outcry" }],
+    images: [{ url: "/logo.png", width: 1200, height: 381, alt: "Outcry" }],
   },
 };
 
