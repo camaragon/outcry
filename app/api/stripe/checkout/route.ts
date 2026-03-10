@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 
 const checkoutSchema = z.object({
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
     // If already pro, redirect to billing portal
     if (workspace.stripeSubscriptionId && workspace.stripeCustomerId) {
-      const portalSession = await stripe.billingPortal.sessions.create({
+      const portalSession = await getStripe().billingPortal.sessions.create({
         customer: workspace.stripeCustomerId,
         return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
       });
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     });
 
     // Create checkout session
-    const checkoutSession = await stripe.checkout.sessions.create({
+    const checkoutSession = await getStripe().checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
       customer_email: workspace.stripeCustomerId ? undefined : user?.email,

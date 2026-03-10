@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
@@ -92,7 +92,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   // Fetch subscription to get price and period end
-  const subscription: Stripe.Subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const subscription: Stripe.Subscription = await getStripe().subscriptions.retrieve(subscriptionId);
 
   // In Stripe SDK v20+, current_period_end is on the subscription item, not the subscription
   const subscriptionItem = subscription.items.data[0];

@@ -4,12 +4,13 @@ import {
   Head,
   Heading,
   Html,
+  Img,
   Link,
   Preview,
   Section,
   Text,
 } from "@react-email/components";
-import { main, container, heading, text, card, button, footer } from "./styles";
+import { main, container, heading, text, card, button, footer, logoHeader } from "./styles";
 
 interface NewFeedbackEmailProps {
   postTitle: string;
@@ -42,6 +43,14 @@ export default function NewFeedbackEmail({
       <Preview>New feedback: {postTitle}</Preview>
       <Body style={main}>
         <Container style={container}>
+          <Section style={logoHeader}>
+            <Img
+              src="https://outcry.app/logo.png"
+              alt="Outcry"
+              width="100"
+              height="32"
+            />
+          </Section>
           <Heading style={heading}>New Feedback</Heading>
 
           <Text style={text}>

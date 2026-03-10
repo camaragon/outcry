@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 
 export default function MarketingLayout({
   children,
@@ -11,9 +12,7 @@ export default function MarketingLayout({
     <div className="flex min-h-screen flex-col">
       <nav className="border-b">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <Link href="/" className="text-xl font-bold">
-            Outcry
-          </Link>
+          <Logo href="/" />
           <div className="flex items-center gap-4">
             <Link
               href="/pricing"
@@ -39,7 +38,7 @@ export default function MarketingLayout({
         <div className="mx-auto max-w-6xl px-4">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold">Outcry</span>
+              <Logo href="/" size="sm" />
               <span className="text-muted-foreground">— Boards that think</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
