@@ -60,7 +60,7 @@ const MarketingPage = () => {
           </Badge>
           <h1 className="text-5xl font-bold tracking-tight sm:text-7xl">
             Boards that{" "}
-            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#2EC4A5] to-[#2EC4A5]/60 bg-clip-text text-transparent">
               think
             </span>
           </h1>
