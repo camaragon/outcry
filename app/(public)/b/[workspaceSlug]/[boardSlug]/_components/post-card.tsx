@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { STATUS_LABELS, type PostStatus } from "@/lib/post-statuses";
 import { UpvoteButton } from "./upvote-button";
 
@@ -45,7 +46,7 @@ export function PostCard({
       >
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="font-medium text-foreground">{post.title}</h3>
-          <Badge variant={statusInfo.variant} className="text-xs">
+          <Badge variant={statusInfo.variant} className={cn("text-xs", statusInfo.className)}>
             {statusInfo.label}
           </Badge>
           {post.category && (

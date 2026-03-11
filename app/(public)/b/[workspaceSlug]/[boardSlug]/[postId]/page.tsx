@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { db } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { STATUS_LABELS, type PostStatus } from "@/lib/post-statuses";
 import { UpvoteButton } from "../_components/upvote-button";
 import { CommentsSection } from "./_components/comments-section";
@@ -105,7 +106,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl font-bold sm:text-2xl">{post.title}</h1>
-            <Badge variant={statusInfo.variant} className="text-xs">
+            <Badge variant={statusInfo.variant} className={cn("text-xs", statusInfo.className)}>
               {statusInfo.label}
             </Badge>
             {post.category && (

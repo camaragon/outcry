@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useAction } from "@/hooks/use-action";
 import { createPost } from "@/actions/create-post";
+import { cn } from "@/lib/utils";
 import { STATUS_LABELS, type PostStatus } from "@/lib/post-statuses";
 
 interface SimilarPost {
@@ -235,7 +236,7 @@ export function CreatePostDialog({
                             </span>
                             <Badge
                               variant={statusInfo.variant}
-                              className="text-[10px] shrink-0"
+                              className={cn("text-[10px] shrink-0", statusInfo.className)}
                             >
                               {statusInfo.label}
                             </Badge>
