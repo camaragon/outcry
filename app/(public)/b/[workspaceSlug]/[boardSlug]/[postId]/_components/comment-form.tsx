@@ -52,7 +52,7 @@ export function CommentForm({ postId }: CommentFormProps) {
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="flex justify-end">
-        <Button type="submit" size="sm" disabled={isLoading || !body.trim()}>
+        <Button type="submit" variant="secondary" size="sm" disabled={isLoading || !body.trim()}>
           {isLoading ? "Posting..." : "Comment"}
         </Button>
       </div>

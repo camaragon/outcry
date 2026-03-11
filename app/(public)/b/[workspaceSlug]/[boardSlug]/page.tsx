@@ -97,7 +97,7 @@ export default async function PublicBoardPage({
             className="size-10 rounded-lg object-cover"
           />
         ) : (
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <div className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
             <Megaphone className="size-5" />
           </div>
         )}

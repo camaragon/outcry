@@ -155,7 +155,7 @@ export function CreatePostDialog({
   // If not signed in, show a sign-in button instead
   if (!isSignedIn) {
     return (
-      <Button asChild>
+      <Button variant="outline" asChild>
         <Link href={`/sign-in?redirect_url=${encodeURIComponent(pathname)}`}>
           <Plus className="size-4" />
           Sign in to post
@@ -167,7 +167,7 @@ export function CreatePostDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>
+        <Button variant="outline">
           <Plus className="size-4" />
           New Post
         </Button>
