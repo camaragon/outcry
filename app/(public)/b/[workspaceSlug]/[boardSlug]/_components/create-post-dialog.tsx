@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useAction } from "@/hooks/use-action";
 import { createPost } from "@/actions/create-post";
+import { cn } from "@/lib/utils";
 import { STATUS_LABELS, type PostStatus } from "@/lib/post-statuses";
 
 interface SimilarPost {
@@ -154,7 +155,7 @@ export function CreatePostDialog({
   // If not signed in, show a sign-in button instead
   if (!isSignedIn) {
     return (
-      <Button asChild>
+      <Button variant="outline" asChild>
         <Link href={`/sign-in?redirect_url=${encodeURIComponent(pathname)}`}>
           <Plus className="size-4" />
           Sign in to post
@@ -166,7 +167,7 @@ export function CreatePostDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>
+        <Button variant="outline">
           <Plus className="size-4" />
           New Post
         </Button>
@@ -235,7 +236,7 @@ export function CreatePostDialog({
                             </span>
                             <Badge
                               variant={statusInfo.variant}
-                              className="text-[10px] shrink-0"
+                              className={cn("text-[10px] shrink-0", statusInfo.className)}
                             >
                               {statusInfo.label}
                             </Badge>

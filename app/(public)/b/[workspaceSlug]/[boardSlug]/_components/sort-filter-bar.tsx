@@ -72,7 +72,7 @@ export function SortFilterBar({
           {SORT_OPTIONS.map((opt) => (
             <Button
               key={opt.value}
-              variant={currentSort === opt.value ? "default" : "outline"}
+              variant={currentSort === opt.value ? "secondary" : "outline"}
               size="sm"
               onClick={() => updateParam("sort", opt.value)}
             >
