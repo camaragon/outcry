@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAction } from "@/hooks/use-action";
 import { updatePostStatus } from "@/actions/update-post-status";
+import { cn } from "@/lib/utils";
 import { POST_STATUSES, STATUS_LABELS, type PostStatus } from "@/lib/post-statuses";
 
 interface StatusDropdownProps {
@@ -36,7 +37,7 @@ export function StatusDropdown({ postId, currentStatus }: StatusDropdownProps) {
           className="cursor-pointer"
           aria-label={`Change status, current: ${currentInfo.label}`}
         >
-          <Badge variant={currentInfo.variant} className="text-xs">
+          <Badge variant={currentInfo.variant} className={cn("text-xs", currentInfo.className)}>
             {currentInfo.label}
           </Badge>
         </button>

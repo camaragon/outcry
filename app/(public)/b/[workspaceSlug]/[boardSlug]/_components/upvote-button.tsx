@@ -43,11 +43,12 @@ export function UpvoteButton({
 
   return (
     <Button
-      variant={hasVoted ? "default" : "outline"}
+      variant="outline"
       size="sm"
       className={cn(
         "flex h-auto flex-col gap-0.5 px-3 py-2 min-w-[3.5rem]",
-        hasVoted && "bg-primary text-primary-foreground",
+        hasVoted &&
+          "border-primary/50 bg-primary/10 text-primary hover:bg-primary/15 dark:bg-primary/15 dark:hover:bg-primary/20",
       )}
       onClick={handleClick}
       disabled={isLoading}
