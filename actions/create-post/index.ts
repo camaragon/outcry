@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { findOrCreateUser } from "@/lib/find-or-create-user";
 import { generateEmbedding } from "@/lib/embeddings";
+import { autoCategorize } from "@/lib/auto-categorize";
 import { notifyNewFeedback } from "@/lib/notifications";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { CreatePost } from "./schema";
@@ -19,7 +20,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     currentUser(),
     db.board.findUnique({
       where: { id: boardId },
-      select: { id: true, workspaceId: true, slug: true, workspace: { select: { slug: true } } },
+      select: { id: true, workspaceId: true, slug: true, workspace: { select: { slug: true, plan: true } } },
     }),
   ]);
 
@@ -67,6 +68,25 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       notifyNewFeedback({ postId: post.id }).catch((err) =>
         console.error("[notifications] Failed to notify admins:", err)
       ),
+      // AI auto-categorization (Pro workspaces only)
+      board.workspace.plan === "PRO"
+        ? autoCategorize(title, body, board.workspaceId)
+            .then(async (result) => {
+              if (!result) return;
+              await db.post.update({
+                where: { id: post.id },
+                data: { categoryId: result.categoryId },
+              });
+              console.log(
+                `[auto-categorize] Post ${post.id} categorized as "${result.categoryName}"`,
+              );
+              // Revalidate so the category shows on next load
+              revalidatePath(`/b/${board.workspace.slug}/${board.slug}`);
+            })
+            .catch((err) =>
+              console.error("[auto-categorize] Failed to categorize post:", err)
+            )
+        : Promise.resolve(),
     ]);
   });
 
