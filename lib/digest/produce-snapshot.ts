@@ -125,7 +125,7 @@ export async function produceSnapshot(
       workspaceId,
       periodStart,
       periodEnd,
-      snapshot: snapshot as unknown as Record<string, unknown>,
+      snapshot: JSON.parse(JSON.stringify(snapshot)),
       status: "success",
       totalNewPosts: aggregation.currentPeriod.totalPosts,
       engagementTrend: delta.engagementTrend,
