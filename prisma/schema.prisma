@@ -21,10 +21,13 @@ model Workspace {
   stripePriceId          String?
   stripeCurrentPeriodEnd DateTime?
 
+  productCategory String? // Set during onboarding: "developer_tool" | "ecommerce" | "saas" | "mobile_app" | "other"
+
   boards     Board[]
   users      User[]
   categories Category[]
   changelogs Changelog[]
+  digests    DigestSnapshot[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -32,6 +35,7 @@ model Workspace {
 
 enum Plan {
   FREE
+  STARTER
   PRO
 }
 
@@ -197,4 +201,26 @@ model ChangelogPost {
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([changelogId, postId])
+}
+
+model DigestSnapshot {
+  id          String  @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  periodStart DateTime
+  periodEnd   DateTime
+  snapshot    Json     // Full IntelligenceSnapshot JSON artifact
+  status      String   @default("success") // "success" | "failed" | "skipped"
+  failReason  String?  // Why it failed or was skipped
+
+  // Denormalized fields for querying without parsing JSON
+  totalNewPosts   Int?
+  engagementTrend String? // "up" | "down" | "stable"
+  topTopic        String? // Most mentioned topic label
+
+  createdAt DateTime @default(now())
+
+  @@index([workspaceId])
+  @@index([workspaceId, periodEnd])
+  @@index([status])
 }
