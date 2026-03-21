@@ -10,6 +10,8 @@ export interface TrendingTopic {
   examplePostIds: string[];
   sentiment: "positive" | "neutral" | "frustrated";
   isNew: boolean;
+  /** AI-generated one-line context about this topic's trajectory and composition */
+  description: string | null;
 }
 
 export interface EmergingTheme {

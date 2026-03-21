@@ -221,6 +221,7 @@ function buildCategoryFallback(period: PeriodData) {
       examplePostIds: data.postIds.slice(0, 3),
       sentiment: "neutral",
       isNew: false,
+      description: null, // Cold start — no AI descriptions for small boards
     });
   }
 
@@ -234,6 +235,7 @@ function buildCategoryFallback(period: PeriodData) {
       examplePostIds: [],
       sentiment: "neutral",
       isNew: false,
+      description: null,
     });
   }
 

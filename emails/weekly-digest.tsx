@@ -354,7 +354,8 @@ function TopicCard({
   topic: TrendingTopic;
   growthPercent?: number;
 }) {
-  const context = buildTopicContext(topic);
+  // Use AI-generated description when available, fall back to metadata-based context
+  const context = topic.description || buildTopicContext(topic);
 
   return (
     <Section style={topicCard}>
@@ -393,7 +394,7 @@ function TopicCard({
       <Text style={topicStats}>
         {topic.postCount} mentions · {topic.totalVotes} votes
       </Text>
-      {/* Row 3: Context description — the analyst insight */}
+      {/* Row 3: Context description — AI-generated analyst insight */}
       <Text style={topicContext}>{context}</Text>
     </Section>
   );
