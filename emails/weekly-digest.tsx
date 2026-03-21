@@ -76,7 +76,7 @@ function sentimentPillColor(sentiment: TrendingTopic["sentiment"]): string {
 function statusLabel(status: string): string {
   return status
     .split("_")
-    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(" ");
 }
 
@@ -364,8 +364,10 @@ function TopicCard({
         <Column>
           <Text style={topicName}>
             {topic.topic}
-            {topic.isNew && <span style={newBadge}> NEW</span>}
           </Text>
+          {topic.isNew && (
+            <Text style={newBadge}>NEW</Text>
+          )}
         </Column>
         <Column align="right">
           <Row>
@@ -556,8 +558,8 @@ const newBadge = {
   backgroundColor: "#2EC4A5",
   padding: "2px 6px",
   borderRadius: "3px",
-  marginLeft: "6px",
-  verticalAlign: "middle" as const,
+  margin: "0",
+  display: "inline-block" as const,
 };
 
 const growthBadge = {

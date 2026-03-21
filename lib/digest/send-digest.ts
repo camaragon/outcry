@@ -23,6 +23,7 @@ export async function sendDigestEmail({
     console.warn("[digest-email] Resend not configured — skipping email send");
     return;
   }
+  const emailClient = resend;
 
   // Get workspace admins/owners to send the digest to
   const recipients = await db.user.findMany({
@@ -69,7 +70,7 @@ export async function sendDigestEmail({
   // Send to each recipient individually (Resend handles batching)
   const results = await Promise.allSettled(
     recipients.map((recipient) =>
-      resend!.emails.send({
+      emailClient.emails.send({
         from: FROM_EMAIL,
         to: recipient.email,
         subject,
