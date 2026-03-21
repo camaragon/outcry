@@ -21,7 +21,7 @@ model Workspace {
   stripePriceId          String?
   stripeCurrentPeriodEnd DateTime?
 
-  productCategory String? // Set during onboarding: "developer_tool" | "ecommerce" | "saas" | "mobile_app" | "other"
+  productCategory ProductCategory? // Set during onboarding
 
   boards     Board[]
   users      User[]
@@ -35,8 +35,16 @@ model Workspace {
 
 enum Plan {
   FREE
-  STARTER
+  STARTER // Three-tier pricing — gating logic added in pricing tier PR
   PRO
+}
+
+enum ProductCategory {
+  DEVELOPER_TOOL
+  ECOMMERCE
+  SAAS
+  MOBILE_APP
+  OTHER
 }
 
 model User {
@@ -232,6 +240,7 @@ model DigestSnapshot {
 
   createdAt DateTime @default(now())
 
+  @@unique([workspaceId, periodStart, periodEnd])
   @@index([workspaceId])
   @@index([workspaceId, periodEnd])
   @@index([status])

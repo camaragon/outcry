@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { aggregate, computeDeltas } from "./aggregate";
 import { clusterTopics } from "./cluster-topics";
@@ -75,6 +76,8 @@ export async function produceSnapshot(
         : buildCategoryFallback(aggregation.currentPeriod);
 
     // Step 4: Detect emerging themes from trending topics
+    // Note: growthPercent is a placeholder (100 for new, 0 otherwise).
+    // Real WoW growth requires cross-period topic matching, planned for v2.
     const emergingThemes = trendingTopics
       .filter((t) => t.isNew || t.postCount >= 3)
       .slice(0, 3)
@@ -138,7 +141,7 @@ export async function produceSnapshot(
         workspaceId,
         periodStart,
         periodEnd,
-        snapshot: JSON.parse(JSON.stringify(snapshot)),
+        snapshot: snapshot as unknown as Prisma.InputJsonValue,
         status: "SUCCESS",
         totalNewPosts: aggregation.currentPeriod.totalPosts,
         engagementTrend: trendMap[delta.engagementTrend],
@@ -186,8 +189,8 @@ function buildCategoryFallback(period: import("./types").PeriodData) {
     topics.push({
       topic: data.categoryName,
       postCount: data.count,
-      totalVotes: 0,
-      examplePostIds: [],
+      totalVotes: data.totalVotes,
+      examplePostIds: data.postIds.slice(0, 3),
       sentiment: "neutral",
       isNew: false,
     });

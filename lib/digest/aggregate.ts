@@ -30,6 +30,7 @@ export async function aggregatePeriod(
       select: {
         id: true,
         authorId: true,
+        voteCount: true,
         categoryId: true,
         category: { select: { name: true } },
       },
@@ -52,17 +53,21 @@ export async function aggregatePeriod(
 
   const postsByCategory = new Map<
     string,
-    { count: number; categoryName: string }
+    { count: number; categoryName: string; totalVotes: number; postIds: string[] }
   >();
   for (const post of posts) {
     if (post.categoryId && post.category) {
       const existing = postsByCategory.get(post.categoryId);
       if (existing) {
         existing.count++;
+        existing.totalVotes += post.voteCount;
+        existing.postIds.push(post.id);
       } else {
         postsByCategory.set(post.categoryId, {
           count: 1,
           categoryName: post.category.name,
+          totalVotes: post.voteCount,
+          postIds: [post.id],
         });
       }
     }

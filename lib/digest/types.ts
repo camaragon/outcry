@@ -81,6 +81,6 @@ export interface PeriodData {
   totalVotes: number;
   totalComments: number;
   activeUserIds: string[];
-  postsByCategory: Map<string, { count: number; categoryName: string }>;
+  postsByCategory: Map<string, { count: number; categoryName: string; totalVotes: number; postIds: string[] }>;
   postIds: string[];
 }
