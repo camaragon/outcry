@@ -2,15 +2,17 @@ import { db } from "@/lib/db";
 import type { TrendingTopic } from "./types";
 
 /**
- * Cluster posts by embedding similarity and generate topic labels.
- * Uses existing pgvector embeddings stored on posts.
+ * Group posts into trending topics based on their categories.
  *
- * For v1, uses a simple approach:
- * 1. Group posts by category (already auto-categorized)
- * 2. For uncategorized posts, find nearest neighbors via embeddings
- * 3. Generate topic labels from the cluster content
+ * Current v1 behavior:
+ * 1. Group posts by their existing (auto-assigned) category.
+ * 2. Treat posts without a category as "uncategorized" and surface
+ *    them as a single topic if there are enough (≥3).
+ * 3. Derive topic metadata (post count, total votes, example posts)
+ *    from each category group.
  *
- * Full embedding-based clustering (k-means, DBSCAN) is a v2 optimization.
+ * Future versions may use embeddings and more advanced clustering
+ * (e.g., k-means, DBSCAN) for finer-grained topic discovery.
  */
 export async function clusterTopics(
   currentPostIds: string[],

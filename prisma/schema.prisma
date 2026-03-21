@@ -203,19 +203,31 @@ model ChangelogPost {
   @@unique([changelogId, postId])
 }
 
+enum DigestStatus {
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
+enum EngagementTrend {
+  UP
+  DOWN
+  STABLE
+}
+
 model DigestSnapshot {
   id          String  @id @default(uuid())
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   periodStart DateTime
   periodEnd   DateTime
-  snapshot    Json     // Full IntelligenceSnapshot JSON artifact
-  status      String   @default("success") // "success" | "failed" | "skipped"
+  snapshot    Json?    // Full IntelligenceSnapshot JSON artifact (null on failure)
+  status      DigestStatus @default(SUCCESS)
   failReason  String?  // Why it failed or was skipped
 
   // Denormalized fields for querying without parsing JSON
   totalNewPosts   Int?
-  engagementTrend String? // "up" | "down" | "stable"
+  engagementTrend EngagementTrend?
   topTopic        String? // Most mentioned topic label
 
   createdAt DateTime @default(now())

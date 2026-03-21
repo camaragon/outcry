@@ -16,7 +16,10 @@ export async function aggregatePeriod(
   periodEnd: Date,
   boardIds: string[],
 ): Promise<PeriodData> {
-  const boardFilter = { boardId: { in: boardIds } };
+  const boardFilter = {
+    boardId: { in: boardIds },
+    board: { workspaceId },
+  };
 
   const [posts, votes, comments] = await Promise.all([
     db.post.findMany({
@@ -97,7 +100,10 @@ export async function getTopPosts(
       category: { select: { name: true } },
       _count: { select: { comments: true } },
     },
-    orderBy: [{ voteCount: "desc" }],
+    orderBy: [
+      { voteCount: "desc" },
+      { comments: { _count: "desc" } },
+    ],
     take: limit,
   });
 

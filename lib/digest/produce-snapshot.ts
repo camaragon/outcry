@@ -18,7 +18,7 @@ interface ProduceOptions {
 /**
  * Produce an IntelligenceSnapshot for a workspace.
  * Orchestrates aggregation, clustering, and summarization.
- * Stores the result in the DigestSnapshot table.
+ * Always stores a DigestSnapshot row — even on failure — for observability.
  */
 export async function produceSnapshot(
   options: ProduceOptions,
@@ -34,106 +34,145 @@ export async function produceSnapshot(
     },
   });
 
-  // Determine which boards to include
-  const boardIds =
-    options.boardIds && options.boardIds.length > 0
-      ? options.boardIds
-      : workspace.boards.map((b) => b.id);
+  // Determine which boards to include, validating against workspace ownership
+  const allowedBoardIds = new Set(workspace.boards.map((b) => b.id));
 
-  // Step 1: Aggregate data
-  const aggregation = await aggregate(
-    workspaceId,
-    periodStart,
-    periodEnd,
-    boardIds,
-  );
-
-  // Step 2: Compute deltas
-  const delta = computeDeltas(
-    aggregation.currentPeriod,
-    aggregation.previousPeriod,
-  );
-
-  // Step 3: Topic clustering (with cold start fallback)
-  const trendingTopics =
-    aggregation.currentPeriod.totalPosts >= CLUSTERING_THRESHOLD
-      ? await clusterTopics(
-          aggregation.currentPeriod.postIds,
-          aggregation.previousPeriod.postIds,
-        )
-      : buildCategoryFallback(aggregation.currentPeriod);
-
-  // Step 4: Detect emerging themes from trending topics
-  const emergingThemes = trendingTopics
-    .filter((t) => t.isNew || t.postCount >= 3)
-    .slice(0, 3)
-    .map((t) => ({
-      topic: t.topic,
-      growthPercent: t.isNew ? 100 : 0,
-      description: t.isNew
-        ? `"${t.topic}" is a new theme this period with ${t.postCount} mentions`
-        : `"${t.topic}" continues with ${t.postCount} mentions and ${t.totalVotes} votes`,
-    }));
-
-  // Step 5: Executive summary (skip if thin data)
-  let executiveSummary: string | null = null;
-  let recommendation: string | null = null;
-
-  if (aggregation.currentPeriod.totalPosts >= SUMMARY_THRESHOLD) {
-    const summaryResult = await generateSummary({
-      totalNewPosts: aggregation.currentPeriod.totalPosts,
-      totalNewVotes: aggregation.currentPeriod.totalVotes,
-      totalNewComments: aggregation.currentPeriod.totalComments,
-      delta,
-      trendingTopics: trendingTopics.slice(0, 5),
-      topPosts: aggregation.topPosts.slice(0, 3),
-    });
-    executiveSummary = summaryResult.summary;
-    recommendation = summaryResult.recommendation;
+  let boardIds: string[];
+  if (options.boardIds && options.boardIds.length > 0) {
+    const invalidIds = options.boardIds.filter((id) => !allowedBoardIds.has(id));
+    if (invalidIds.length > 0) {
+      throw new Error(
+        `Board IDs do not belong to this workspace: ${invalidIds.join(", ")}`,
+      );
+    }
+    boardIds = options.boardIds;
+  } else {
+    boardIds = workspace.boards.map((b) => b.id);
   }
 
-  const snapshot: IntelligenceSnapshot = {
-    workspaceId,
-    workspaceName: workspace.name,
-    generatedAt: new Date().toISOString(),
-    periodStart: periodStart.toISOString(),
-    periodEnd: periodEnd.toISOString(),
-    boardIds,
-    summary: {
-      totalNewPosts: aggregation.currentPeriod.totalPosts,
-      totalNewVotes: aggregation.currentPeriod.totalVotes,
-      totalNewComments: aggregation.currentPeriod.totalComments,
-      activeUsers: aggregation.currentPeriod.activeUserIds.length,
-    },
-    delta,
-    insights: {
-      trendingTopics,
-      emergingThemes,
-      topPosts: aggregation.topPosts,
-      executiveSummary,
-      recommendation,
-    },
-    boards: aggregation.boards,
-  };
-
-  // Store in DB
-  const topTopic =
-    trendingTopics.length > 0 ? trendingTopics[0].topic : null;
-
-  await db.digestSnapshot.create({
-    data: {
+  try {
+    // Step 1: Aggregate data
+    const aggregation = await aggregate(
       workspaceId,
       periodStart,
       periodEnd,
-      snapshot: JSON.parse(JSON.stringify(snapshot)),
-      status: "success",
-      totalNewPosts: aggregation.currentPeriod.totalPosts,
-      engagementTrend: delta.engagementTrend,
-      topTopic,
-    },
-  });
+      boardIds,
+    );
 
-  return snapshot;
+    // Step 2: Compute deltas
+    const delta = computeDeltas(
+      aggregation.currentPeriod,
+      aggregation.previousPeriod,
+    );
+
+    // Step 3: Topic clustering (with cold start fallback)
+    const trendingTopics =
+      aggregation.currentPeriod.totalPosts >= CLUSTERING_THRESHOLD
+        ? await clusterTopics(
+            aggregation.currentPeriod.postIds,
+            aggregation.previousPeriod.postIds,
+          )
+        : buildCategoryFallback(aggregation.currentPeriod);
+
+    // Step 4: Detect emerging themes from trending topics
+    const emergingThemes = trendingTopics
+      .filter((t) => t.isNew || t.postCount >= 3)
+      .slice(0, 3)
+      .map((t) => ({
+        topic: t.topic,
+        growthPercent: t.isNew ? 100 : 0,
+        description: t.isNew
+          ? `"${t.topic}" is a new theme this period with ${t.postCount} mentions`
+          : `"${t.topic}" continues with ${t.postCount} mentions and ${t.totalVotes} votes`,
+      }));
+
+    // Step 5: Executive summary (skip if thin data)
+    let executiveSummary: string | null = null;
+    let recommendation: string | null = null;
+
+    if (aggregation.currentPeriod.totalPosts >= SUMMARY_THRESHOLD) {
+      const summaryResult = await generateSummary({
+        totalNewPosts: aggregation.currentPeriod.totalPosts,
+        totalNewVotes: aggregation.currentPeriod.totalVotes,
+        totalNewComments: aggregation.currentPeriod.totalComments,
+        delta,
+        trendingTopics: trendingTopics.slice(0, 5),
+        topPosts: aggregation.topPosts.slice(0, 3),
+      });
+      executiveSummary = summaryResult.summary;
+      recommendation = summaryResult.recommendation;
+    }
+
+    const snapshot: IntelligenceSnapshot = {
+      workspaceId,
+      workspaceName: workspace.name,
+      generatedAt: new Date().toISOString(),
+      periodStart: periodStart.toISOString(),
+      periodEnd: periodEnd.toISOString(),
+      boardIds,
+      summary: {
+        totalNewPosts: aggregation.currentPeriod.totalPosts,
+        totalNewVotes: aggregation.currentPeriod.totalVotes,
+        totalNewComments: aggregation.currentPeriod.totalComments,
+        activeUsers: aggregation.currentPeriod.activeUserIds.length,
+      },
+      delta,
+      insights: {
+        trendingTopics,
+        emergingThemes,
+        topPosts: aggregation.topPosts,
+        executiveSummary,
+        recommendation,
+      },
+      boards: aggregation.boards,
+    };
+
+    // Store successful snapshot in DB
+    const topTopic =
+      trendingTopics.length > 0 ? trendingTopics[0].topic : null;
+
+    const trendMap = { up: "UP", down: "DOWN", stable: "STABLE" } as const;
+
+    await db.digestSnapshot.create({
+      data: {
+        workspaceId,
+        periodStart,
+        periodEnd,
+        snapshot: JSON.parse(JSON.stringify(snapshot)),
+        status: "SUCCESS",
+        totalNewPosts: aggregation.currentPeriod.totalPosts,
+        engagementTrend: trendMap[delta.engagementTrend],
+        topTopic,
+      },
+    });
+
+    return snapshot;
+  } catch (error) {
+    // Always write a row on failure for observability
+    const failReason =
+      error instanceof Error ? error.message : String(error);
+
+    console.error(
+      `[digest] Failed to produce snapshot for workspace ${workspaceId}:`,
+      failReason,
+    );
+
+    await db.digestSnapshot
+      .create({
+        data: {
+          workspaceId,
+          periodStart,
+          periodEnd,
+          status: "FAILED",
+          failReason,
+        },
+      })
+      .catch((dbErr) =>
+        console.error("[digest] Failed to write failure row:", dbErr),
+      );
+
+    throw error;
+  }
 }
 
 /**
