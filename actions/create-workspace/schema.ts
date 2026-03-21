@@ -34,4 +34,11 @@ export const CreateWorkspace = z.object({
     .refine((val) => !RESERVED_SLUGS.has(val), {
       message: "This URL is reserved. Please choose a different one.",
     }),
+  productCategory: z.enum([
+    "DEVELOPER_TOOL",
+    "ECOMMERCE",
+    "SAAS",
+    "MOBILE_APP",
+    "OTHER",
+  ]),
 });

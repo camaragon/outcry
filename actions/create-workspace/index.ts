@@ -2,11 +2,13 @@
 
 import { currentUser } from "@clerk/nextjs/server";
 import { Prisma } from "@prisma/client";
+import { after } from "next/server";
 import { InputType, ReturnType } from "./types";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { CreateWorkspace } from "./schema";
+import { seedDemoDigest } from "@/lib/digest/seed-demo";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const user = await currentUser();
@@ -25,7 +27,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: "You already have a workspace." };
   }
 
-  const { name, slug } = data;
+  const { name, slug, productCategory } = data;
 
   const email = user.emailAddresses[0]?.emailAddress;
   if (!email) {
@@ -39,6 +41,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       data: {
         name,
         slug,
+        productCategory,
         users: {
           create: {
             clerkId: user.id,
@@ -55,6 +58,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
           },
         },
       },
+      include: {
+        boards: { select: { id: true }, take: 1 },
+      },
     });
   } catch (error) {
     if (
@@ -64,6 +70,16 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       return { error: "This URL is already taken. Please choose a different one." };
     }
     return { error: "Failed to create workspace. Please try again." };
+  }
+
+  // Trigger demo digest seeding + email in the background
+  const boardId = workspace.boards[0]?.id;
+  if (boardId && productCategory) {
+    after(async () => {
+      await seedDemoDigest(workspace.id, boardId, productCategory).catch(
+        (err) => console.error("[create-workspace] Demo digest failed:", err),
+      );
+    });
   }
 
   revalidatePath("/dashboard");

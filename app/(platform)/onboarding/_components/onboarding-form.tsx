@@ -7,7 +7,22 @@ import { createWorkspace } from "@/actions/create-workspace";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
+
+const PRODUCT_CATEGORIES = [
+  { value: "DEVELOPER_TOOL", label: "Developer Tool" },
+  { value: "SAAS", label: "SaaS Platform" },
+  { value: "ECOMMERCE", label: "Ecommerce" },
+  { value: "MOBILE_APP", label: "Mobile App" },
+  { value: "OTHER", label: "Other" },
+] as const;
 
 function slugify(text: string): string {
   return text
@@ -23,10 +38,11 @@ export const OnboardingForm = () => {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
+  const [productCategory, setProductCategory] = useState<string>("");
 
   const { execute, fieldErrors, isLoading } = useAction(createWorkspace, {
     onSuccess: () => {
-      toast.success("Workspace created!");
+      toast.success("Workspace created! Check your email for your first digest.");
       router.push("/dashboard");
     },
     onError: (error) => {
@@ -48,11 +64,21 @@ export const OnboardingForm = () => {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    execute({ name, slug });
+    execute({
+      name,
+      slug,
+      productCategory: productCategory as
+        | "DEVELOPER_TOOL"
+        | "ECOMMERCE"
+        | "SAAS"
+        | "MOBILE_APP"
+        | "OTHER",
+    });
   };
 
   const nameError = fieldErrors?.name?.[0];
   const slugError = fieldErrors?.slug?.[0];
+  const categoryError = fieldErrors?.productCategory?.[0];
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -98,7 +124,39 @@ export const OnboardingForm = () => {
         )}
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading || !name || !slug}>
+      <div className="space-y-2">
+        <Label htmlFor="product-category">What kind of product do you build?</Label>
+        <Select
+          value={productCategory}
+          onValueChange={setProductCategory}
+          disabled={isLoading}
+        >
+          <SelectTrigger id="product-category" aria-invalid={!!categoryError}>
+            <SelectValue placeholder="Select your product type" />
+          </SelectTrigger>
+          <SelectContent>
+            {PRODUCT_CATEGORIES.map((cat) => (
+              <SelectItem key={cat.value} value={cat.value}>
+                {cat.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          We&apos;ll seed your board with sample feedback so you can see Outcry in action
+        </p>
+        {categoryError && (
+          <p className="text-sm text-destructive" role="alert">
+            {categoryError}
+          </p>
+        )}
+      </div>
+
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isLoading || !name || !slug || !productCategory}
+      >
         {isLoading ? "Creating..." : "Create workspace"}
       </Button>
     </form>
