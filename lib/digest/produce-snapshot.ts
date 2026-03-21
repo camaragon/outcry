@@ -136,8 +136,23 @@ export async function produceSnapshot(
 
     const trendMap = { up: "UP", down: "DOWN", stable: "STABLE" } as const;
 
-    await db.digestSnapshot.create({
-      data: {
+    await db.digestSnapshot.upsert({
+      where: {
+        workspaceId_periodStart_periodEnd: {
+          workspaceId,
+          periodStart,
+          periodEnd,
+        },
+      },
+      update: {
+        snapshot: snapshot as unknown as Prisma.InputJsonValue,
+        status: "SUCCESS",
+        failReason: null,
+        totalNewPosts: aggregation.currentPeriod.totalPosts,
+        engagementTrend: trendMap[delta.engagementTrend],
+        topTopic,
+      },
+      create: {
         workspaceId,
         periodStart,
         periodEnd,
@@ -157,12 +172,23 @@ export async function produceSnapshot(
 
     console.error(
       `[digest] Failed to produce snapshot for workspace ${workspaceId}:`,
-      failReason,
+      error,
     );
 
     await db.digestSnapshot
-      .create({
-        data: {
+      .upsert({
+        where: {
+          workspaceId_periodStart_periodEnd: {
+            workspaceId,
+            periodStart,
+            periodEnd,
+          },
+        },
+        update: {
+          status: "FAILED",
+          failReason,
+        },
+        create: {
           workspaceId,
           periodStart,
           periodEnd,
@@ -185,12 +211,27 @@ export async function produceSnapshot(
 function buildCategoryFallback(period: import("./types").PeriodData) {
   const topics: import("./types").TrendingTopic[] = [];
 
+  let categorizedCount = 0;
   for (const [, data] of period.postsByCategory) {
+    categorizedCount += data.count;
     topics.push({
       topic: data.categoryName,
       postCount: data.count,
       totalVotes: data.totalVotes,
       examplePostIds: data.postIds.slice(0, 3),
+      sentiment: "neutral",
+      isNew: false,
+    });
+  }
+
+  // Add uncategorized bucket if significant
+  const uncategorizedCount = period.totalPosts - categorizedCount;
+  if (uncategorizedCount >= 3) {
+    topics.push({
+      topic: "Uncategorized feedback",
+      postCount: uncategorizedCount,
+      totalVotes: 0,
+      examplePostIds: [],
       sentiment: "neutral",
       isNew: false,
     });

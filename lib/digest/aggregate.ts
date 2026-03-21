@@ -27,6 +27,9 @@ export async function aggregatePeriod(
         ...boardFilter,
         createdAt: { gte: periodStart, lt: periodEnd },
       },
+      // Note: voteCount is a lifetime total, not period-scoped. This is
+      // intentional for v1 — users expect to see total popularity. Period-scoped
+      // vote counts are used separately in the delta computation via db.vote.count().
       select: {
         id: true,
         authorId: true,
