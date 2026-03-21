@@ -57,9 +57,7 @@ export async function sendDigestEmail({
   const boardUrl =
     workspace?.boards[0]?.slug && workspace.slug
       ? `${APP_URL}/b/${workspace.slug}/${workspace.boards[0].slug}`
-      : workspace?.slug
-        ? `${APP_URL}/dashboard`
-        : `${APP_URL}/dashboard`;
+      : `${APP_URL}/dashboard`;
 
   const settingsUrl = `${APP_URL}/dashboard/settings`;
   const rawSubject = isDemo

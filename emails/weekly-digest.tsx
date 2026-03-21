@@ -362,12 +362,16 @@ function TopicCard({
       {/* Row 1: Topic name + badges */}
       <Row>
         <Column>
-          <Text style={topicName}>
-            {topic.topic}
-          </Text>
-          {topic.isNew && (
-            <Text style={newBadge}>NEW</Text>
-          )}
+          <Row>
+            <Column>
+              <Text style={topicName}>{topic.topic}</Text>
+            </Column>
+            {topic.isNew && (
+              <Column style={{ width: "40px", paddingLeft: "6px" }}>
+                <Text style={newBadge}>NEW</Text>
+              </Column>
+            )}
+          </Row>
         </Column>
         <Column align="right">
           <Row>
