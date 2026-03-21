@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { aggregate, computeDeltas } from "./aggregate";
 import { clusterTopics } from "./cluster-topics";
 import { generateSummary } from "./summarize";
-import type { IntelligenceSnapshot } from "./types";
+import type { IntelligenceSnapshot, PeriodData, TrendingTopic } from "./types";
 
 const CLUSTERING_THRESHOLD = 20;
 const SUMMARY_THRESHOLD = 5;
@@ -208,8 +208,8 @@ export async function produceSnapshot(
  * Cold start fallback: when < 20 posts, use category counts
  * instead of embedding-based clustering.
  */
-function buildCategoryFallback(period: import("./types").PeriodData) {
-  const topics: import("./types").TrendingTopic[] = [];
+function buildCategoryFallback(period: PeriodData) {
+  const topics: TrendingTopic[] = [];
 
   let categorizedCount = 0;
   for (const [, data] of period.postsByCategory) {

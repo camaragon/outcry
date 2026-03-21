@@ -214,7 +214,7 @@ model ChangelogPost {
 enum DigestStatus {
   SUCCESS
   FAILED
-  SKIPPED
+  SKIPPED // Used by cron job for empty/inactive workspaces — no engine path yet
 }
 
 enum EngagementTrend {
