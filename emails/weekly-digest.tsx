@@ -40,18 +40,64 @@ function trendColor(percent: number): string {
   return "#6b7280";
 }
 
-function sentimentBadge(sentiment: TrendingTopic["sentiment"]): string {
+function sentimentLabel(sentiment: TrendingTopic["sentiment"]): string {
   switch (sentiment) {
     case "frustrated":
-      return "😤";
+      return "Frustrated";
     case "positive":
-      return "😊";
+      return "Positive";
     default:
-      return "💬";
+      return "Neutral";
   }
 }
 
-function statusColor(status: string): string {
+function sentimentPillBg(sentiment: TrendingTopic["sentiment"]): string {
+  switch (sentiment) {
+    case "frustrated":
+      return "#fef2f2";
+    case "positive":
+      return "#f0fdf4";
+    default:
+      return "#f0f4ff";
+  }
+}
+
+function sentimentPillColor(sentiment: TrendingTopic["sentiment"]): string {
+  switch (sentiment) {
+    case "frustrated":
+      return "#dc2626";
+    case "positive":
+      return "#16a34a";
+    default:
+      return "#3b82f6";
+  }
+}
+
+function statusLabel(status: string): string {
+  return status
+    .split("_")
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function statusPillBg(status: string): string {
+  switch (status) {
+    case "PLANNED":
+      return "#eff6ff";
+    case "IN_PROGRESS":
+      return "#fffbeb";
+    case "COMPLETE":
+      return "#f0fdf4";
+    case "UNDER_REVIEW":
+      return "#fef9c3";
+    case "CLOSED":
+      return "#f3f4f6";
+    default:
+      return "#f3f4f6";
+  }
+}
+
+function statusPillColor(status: string): string {
   switch (status) {
     case "PLANNED":
       return "#2563eb";
@@ -60,24 +106,46 @@ function statusColor(status: string): string {
     case "COMPLETE":
       return "#16a34a";
     case "UNDER_REVIEW":
-      return "#7c3aed";
+      return "#ca8a04";
     case "CLOSED":
       return "#6b7280";
     default:
-      return "#1a1a1a";
+      return "#6b7280";
   }
 }
 
-function formatStatus(status: string): string {
-  return status
-    .split("_")
-    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
-    .join(" ");
+/**
+ * Build a one-line context description for a topic from available data.
+ * This is the "analyst insight" line that makes the email feel intelligent.
+ */
+function buildTopicContext(topic: TrendingTopic): string {
+  const parts: string[] = [];
+
+  if (topic.isNew) {
+    parts.push("New this period");
+  }
+
+  // Sentiment-driven context
+  if (topic.sentiment === "frustrated" && topic.postCount >= 5) {
+    parts.push("users are vocal about this");
+  } else if (topic.sentiment === "positive") {
+    parts.push("positive reception");
+  }
+
+  if (topic.totalVotes > topic.postCount * 3) {
+    parts.push("high engagement per post");
+  }
+
+  if (parts.length === 0) {
+    parts.push(`${topic.postCount} mentions this period`);
+  }
+
+  return parts.join(". ") + ".";
 }
 
 /**
  * Build the dynamic email subject line from the snapshot.
- * "Outcry: 'Dark mode' trending, engagement up 23% this week"
+ * Always includes one specific topic and one metric. Never generic.
  */
 export function buildDigestSubject(snapshot: IntelligenceSnapshot): string {
   const topTopic =
@@ -111,6 +179,14 @@ export default function WeeklyDigestEmail({
   const hasEmergingThemes = insights.emergingThemes.length > 0;
   const hasTopPosts = insights.topPosts.length > 0;
 
+  // Build a growth map from emerging themes for per-topic growth badges
+  const growthByTopic = new Map<string, number>();
+  for (const theme of insights.emergingThemes) {
+    if (theme.growthPercent > 0) {
+      growthByTopic.set(theme.topic, theme.growthPercent);
+    }
+  }
+
   return (
     <Html>
       <Head />
@@ -120,12 +196,13 @@ export default function WeeklyDigestEmail({
           : `${summary.totalNewPosts} new posts this week on ${snapshot.workspaceName}`}
       </Preview>
       <Body style={main}>
-        <Container style={container}>
-          {/* Minimal header */}
+        <Container style={emailContainer}>
+          {/* Header: badge + subtitle + date range */}
           <Section>
             <Row>
               <Column>
                 <Text style={brandBadge}>OUTCRY</Text>
+                <Text style={brandSubtitle}>Weekly Digest</Text>
               </Column>
               <Column align="right">
                 <Text style={dateText}>{dateRange}</Text>
@@ -133,7 +210,7 @@ export default function WeeklyDigestEmail({
             </Row>
           </Section>
 
-          {/* Executive summary — the hook, no header */}
+          {/* Executive summary — the hook, no section header */}
           {insights.executiveSummary && (
             <Text style={executiveSummaryStyle}>
               {insights.executiveSummary}
@@ -144,7 +221,7 @@ export default function WeeklyDigestEmail({
           {insights.recommendation && (
             <Section style={recommendationBox}>
               <Text style={recommendationText}>
-                💡 {insights.recommendation}
+                {insights.recommendation}
               </Text>
             </Section>
           )}
@@ -193,9 +270,13 @@ export default function WeeklyDigestEmail({
           {/* Trending topics */}
           {hasTopics && (
             <Section>
-              <Text style={sectionTitle}>Trending Topics</Text>
+              <Text style={sectionTitle}>TRENDING TOPICS</Text>
               {insights.trendingTopics.slice(0, 5).map((topic, i) => (
-                <TopicRow key={i} topic={topic} />
+                <TopicCard
+                  key={i}
+                  topic={topic}
+                  growthPercent={growthByTopic.get(topic.topic)}
+                />
               ))}
             </Section>
           )}
@@ -203,7 +284,7 @@ export default function WeeklyDigestEmail({
           {/* Emerging this week — only if data supports it */}
           {hasEmergingThemes && (
             <Section>
-              <Text style={sectionTitle}>🆕 Emerging This Week</Text>
+              <Text style={sectionTitle}>EMERGING THIS WEEK</Text>
               {insights.emergingThemes.map((theme, i) => (
                 <Section key={i} style={emergingCard}>
                   <Text style={emergingText}>
@@ -217,9 +298,9 @@ export default function WeeklyDigestEmail({
           {/* Top posts */}
           {hasTopPosts && (
             <Section>
-              <Text style={sectionTitle}>Top Posts</Text>
+              <Text style={sectionTitle}>TOP POSTS THIS WEEK</Text>
               {insights.topPosts.slice(0, 3).map((post, i) => (
-                <PostRow key={i} post={post} />
+                <PostCard key={i} post={post} />
               ))}
             </Section>
           )}
@@ -264,45 +345,82 @@ export default function WeeklyDigestEmail({
   );
 }
 
-function TopicRow({ topic }: { topic: TrendingTopic }) {
+// ─── Topic Card ─────────────────────────────────────────────────────────────
+
+function TopicCard({
+  topic,
+  growthPercent,
+}: {
+  topic: TrendingTopic;
+  growthPercent?: number;
+}) {
+  const context = buildTopicContext(topic);
+
   return (
-    <Section style={topicRow}>
+    <Section style={topicCard}>
+      {/* Row 1: Topic name + badges */}
       <Row>
-        <Column style={{ width: "24px" }}>
-          <Text style={topicSentiment}>{sentimentBadge(topic.sentiment)}</Text>
-        </Column>
         <Column>
           <Text style={topicName}>
             {topic.topic}
             {topic.isNew && <span style={newBadge}> NEW</span>}
           </Text>
-          <Text style={topicMeta}>
-            {topic.postCount} posts · {topic.totalVotes} votes
-          </Text>
+        </Column>
+        <Column align="right">
+          <Row>
+            {/* Growth badge */}
+            {growthPercent && growthPercent > 0 && (
+              <Column align="right">
+                <Text style={growthBadge}>+{growthPercent}%</Text>
+              </Column>
+            )}
+            {/* Sentiment pill */}
+            <Column align="right">
+              <Text
+                style={{
+                  ...sentimentPill,
+                  backgroundColor: sentimentPillBg(topic.sentiment),
+                  color: sentimentPillColor(topic.sentiment),
+                }}
+              >
+                {sentimentLabel(topic.sentiment)}
+              </Text>
+            </Column>
+          </Row>
         </Column>
       </Row>
+      {/* Row 2: Stats */}
+      <Text style={topicStats}>
+        {topic.postCount} mentions · {topic.totalVotes} votes
+      </Text>
+      {/* Row 3: Context description — the analyst insight */}
+      <Text style={topicContext}>{context}</Text>
     </Section>
   );
 }
 
-function PostRow({ post }: { post: TopPost }) {
+// ─── Post Card ──────────────────────────────────────────────────────────────
+
+function PostCard({ post }: { post: TopPost }) {
   return (
-    <Section style={postRow}>
+    <Section style={postCard}>
       <Row>
-        <Column style={{ width: "48px" }}>
-          <Text style={voteBox}>▲ {post.voteCount}</Text>
+        <Column style={voteColumn} align="center">
+          <Text style={voteCount}>{post.voteCount}</Text>
+          <Text style={voteLabel}>votes</Text>
         </Column>
-        <Column>
-          <Text style={postTitle}>{post.title}</Text>
+        <Column style={postContent}>
+          <Text style={postTitleStyle}>{post.title}</Text>
         </Column>
-        <Column align="right" style={{ width: "100px" }}>
+        <Column align="right" style={{ width: "110px" }}>
           <Text
             style={{
-              ...statusBadge,
-              color: statusColor(post.status),
+              ...statusPill,
+              backgroundColor: statusPillBg(post.status),
+              color: statusPillColor(post.status),
             }}
           >
-            {formatStatus(post.status)}
+            {statusLabel(post.status)}
           </Text>
         </Column>
       </Row>
@@ -311,13 +429,25 @@ function PostRow({ post }: { post: TopPost }) {
 }
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
-// All inline for email client compatibility
+// All inline for email client compatibility. Graceful degradation:
+// if pills render as plain text in Outlook, they're still readable.
+
+const emailContainer = {
+  ...container,
+  padding: "32px 24px",
+};
 
 const brandBadge = {
   fontSize: "13px",
   fontWeight: "700" as const,
   color: "#2EC4A5",
   letterSpacing: "2px",
+  margin: "0",
+};
+
+const brandSubtitle = {
+  fontSize: "13px",
+  color: "#9ca3af",
   margin: "0",
 };
 
@@ -392,28 +522,27 @@ const metricTrend = {
 };
 
 const sectionTitle = {
-  fontSize: "14px",
-  fontWeight: "600" as const,
+  fontSize: "12px",
+  fontWeight: "700" as const,
   color: "#6b7280",
   textTransform: "uppercase" as const,
-  letterSpacing: "0.5px",
-  margin: "0 0 12px",
+  letterSpacing: "1px",
+  margin: "0 0 16px",
 };
 
-const topicRow = {
-  padding: "8px 0",
-  borderBottom: "1px solid #f3f4f6",
-};
+// ─── Topic Card Styles ──────────────────────────────────────────────────────
 
-const topicSentiment = {
-  fontSize: "16px",
-  margin: "0",
-  lineHeight: "24px",
+const topicCard = {
+  backgroundColor: "#f9fafb",
+  borderLeft: "3px solid #e5e7eb",
+  borderRadius: "0 6px 6px 0",
+  padding: "14px 16px",
+  margin: "0 0 10px",
 };
 
 const topicName = {
   fontSize: "15px",
-  fontWeight: "500" as const,
+  fontWeight: "600" as const,
   color: "#1a1a1a",
   margin: "0",
   lineHeight: "22px",
@@ -424,17 +553,98 @@ const newBadge = {
   fontWeight: "700" as const,
   color: "#ffffff",
   backgroundColor: "#2EC4A5",
-  padding: "1px 5px",
+  padding: "2px 6px",
   borderRadius: "3px",
   marginLeft: "6px",
   verticalAlign: "middle" as const,
 };
 
-const topicMeta = {
+const growthBadge = {
+  fontSize: "11px",
+  fontWeight: "700" as const,
+  color: "#16a34a",
+  backgroundColor: "#f0fdf4",
+  padding: "2px 8px",
+  borderRadius: "10px",
+  margin: "0 4px 0 0",
+  display: "inline-block" as const,
+};
+
+const sentimentPill = {
+  fontSize: "11px",
+  fontWeight: "600" as const,
+  padding: "2px 10px",
+  borderRadius: "10px",
+  margin: "0",
+  display: "inline-block" as const,
+};
+
+const topicStats = {
   fontSize: "13px",
   color: "#6b7280",
-  margin: "2px 0 0",
+  margin: "4px 0 0",
 };
+
+const topicContext = {
+  fontSize: "13px",
+  color: "#4b5563",
+  margin: "4px 0 0",
+  fontStyle: "italic" as const,
+};
+
+// ─── Post Card Styles ───────────────────────────────────────────────────────
+
+const postCard = {
+  backgroundColor: "#f9fafb",
+  borderRadius: "6px",
+  padding: "12px 16px",
+  margin: "0 0 8px",
+};
+
+const voteColumn = {
+  width: "56px",
+};
+
+const voteCount = {
+  fontSize: "18px",
+  fontWeight: "700" as const,
+  color: "#2EC4A5",
+  margin: "0",
+  textAlign: "center" as const,
+  lineHeight: "22px",
+};
+
+const voteLabel = {
+  fontSize: "10px",
+  color: "#6b7280",
+  margin: "0",
+  textAlign: "center" as const,
+  textTransform: "uppercase" as const,
+};
+
+const postContent = {
+  paddingLeft: "8px",
+};
+
+const postTitleStyle = {
+  fontSize: "14px",
+  fontWeight: "500" as const,
+  color: "#1a1a1a",
+  margin: "0",
+  lineHeight: "20px",
+};
+
+const statusPill = {
+  fontSize: "11px",
+  fontWeight: "600" as const,
+  padding: "3px 10px",
+  borderRadius: "10px",
+  margin: "0",
+  display: "inline-block" as const,
+  textAlign: "right" as const,
+};
+
+// ─── Shared Styles ──────────────────────────────────────────────────────────
 
 const emergingCard = {
   backgroundColor: "#eff6ff",
@@ -448,35 +658,6 @@ const emergingText = {
   lineHeight: "22px",
   color: "#1e40af",
   margin: "0",
-};
-
-const postRow = {
-  padding: "10px 0",
-  borderBottom: "1px solid #f3f4f6",
-};
-
-const voteBox = {
-  fontSize: "13px",
-  fontWeight: "600" as const,
-  color: "#2EC4A5",
-  margin: "0",
-  textAlign: "center" as const,
-};
-
-const postTitle = {
-  fontSize: "14px",
-  color: "#1a1a1a",
-  margin: "0",
-  lineHeight: "20px",
-};
-
-const statusBadge = {
-  fontSize: "11px",
-  fontWeight: "600" as const,
-  margin: "0",
-  textAlign: "right" as const,
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.3px",
 };
 
 const divider = {
