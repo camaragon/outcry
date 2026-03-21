@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Outcry is an AI-native feedback and roadmap SaaS ("boards that think") built as a single Next.js 16 monorepo (marketing + application). It targets SaaS teams with flat $49/mo Pro pricing. See `MVP_SPEC.md` for full product spec.
+Outcry is an AI-native feedback and roadmap SaaS ("boards that think") built as a single Next.js 16 monorepo (marketing + application). Three-tier pricing: Free ($0), Starter (~$19/mo), Pro ($49/mo). See `MVP_SPEC.md` for full product spec.
 
 ## Commands
 
@@ -17,6 +17,12 @@ npm run db:studio    # Open Prisma Studio (uses .env.local)
 ```
 
 No test framework is installed yet. CI runs `lint` then `build` (which includes type checking).
+
+## Git Conventions
+
+- **Conventional commits** — follow https://www.conventionalcommits.org/en/v1.0.0/ strictly. Use correct type (feat/fix/refactor/style/perf/chore/docs/test). Message must start with a verb (e.g. `feat: add weekly digest email`, not `feat: weekly digest email`).
+- **PRs required** — all code changes must go through a pull request. No direct pushes to main.
+- **No loose docs in repo root** — design docs, specs, and notes go in `docs/` or external tools, not the project root.
 
 ## Architecture
 
