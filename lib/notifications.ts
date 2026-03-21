@@ -7,7 +7,7 @@ import { db } from "./db";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://outcry.app";
 
 /** Strip CR/LF and truncate for safe use in email subjects */
-function sanitizeSubject(text: string, maxLength = 100): string {
+export function sanitizeSubject(text: string, maxLength = 100): string {
   return text.replace(/[\r\n]+/g, " ").trim().slice(0, maxLength);
 }
 

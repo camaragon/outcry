@@ -1,5 +1,6 @@
 import { resend, FROM_EMAIL } from "@/lib/resend";
 import { db } from "@/lib/db";
+import { sanitizeSubject } from "@/lib/notifications";
 import WeeklyDigestEmail, { buildDigestSubject } from "@/emails/weekly-digest";
 import type { IntelligenceSnapshot } from "./types";
 
@@ -39,23 +40,31 @@ export async function sendDigestEmail({
     return;
   }
 
-  // Build the workspace board URL
+  // Build the workspace board URL from the boards included in this digest
   const workspace = await db.workspace.findUnique({
     where: { id: snapshot.workspaceId },
     select: {
       slug: true,
-      boards: { select: { slug: true }, take: 1 },
+      boards: {
+        where: { id: { in: snapshot.boardIds } },
+        select: { slug: true },
+        take: 1,
+      },
     },
   });
 
-  const boardUrl = workspace?.boards[0]
-    ? `${APP_URL}/b/${workspace.slug}/${workspace.boards[0].slug}`
-    : `${APP_URL}/dashboard`;
+  const boardUrl =
+    workspace?.boards[0]?.slug && workspace.slug
+      ? `${APP_URL}/b/${workspace.slug}/${workspace.boards[0].slug}`
+      : workspace?.slug
+        ? `${APP_URL}/dashboard`
+        : `${APP_URL}/dashboard`;
 
   const settingsUrl = `${APP_URL}/dashboard/settings`;
-  const subject = isDemo
+  const rawSubject = isDemo
     ? `Here's your first Outcry digest — this is what you'll get every week`
     : buildDigestSubject(snapshot);
+  const subject = sanitizeSubject(rawSubject);
 
   // Send to each recipient individually (Resend handles batching)
   const results = await Promise.allSettled(
